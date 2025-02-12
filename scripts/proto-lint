@@ -1,0 +1,5 @@
+export PATH="$PATH:$(go env GOPATH)/bin"
+
+echo "Running protolint"
+protolint lint .
+echo "no linting problems found"

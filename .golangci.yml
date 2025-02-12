@@ -1,0 +1,41 @@
+linters:
+  enable:
+    - bodyclose
+    - dogsled
+    - dupl
+    - gochecknoglobals
+    - gochecknoinits
+    - gocognit
+    - goconst
+    - gocritic
+    - gocyclo
+    - gofmt
+    - revive
+    - gosec
+    - lll
+    - govet
+    - misspell
+    - nakedret
+    - exportloopref
+    - unconvert
+    - whitespace
+linters-settings:
+  funlen:
+    lines: 90
+issues:
+  exclude-dirs:
+    - .*mocks.*
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - funlen
+        - maligned
+        - dupl
+        - gochecknoglobals
+        - bodyclose
+        - typecheck
+        - lll
+        - gocognit
+    - path: internal/*
+      linters:
+        - typecheck

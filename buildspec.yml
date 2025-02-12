@@ -1,0 +1,30 @@
+version: 0.2
+
+phases:
+  install: 
+    runtime-versions:
+      golang: 1.18
+    commands:
+      - echo 'Setting Golang environment'
+      - git settings --global url.https://$GITHUB_TOKEN_CODEBUILD@github.com/jhonquirama/.insteadOf https://github.com/jhonquirama
+      - export GOPRIVATE=""
+      - git --version
+      - go version
+      - go env
+      - make clean
+      - go mod download
+      - apk update
+  build:
+    commands:
+      - go get all
+      - make build
+      - echo Start build...
+      - make aws_build
+  post_build:
+    commands:
+      - echo Artifacts
+      - make swagger
+artifacts:
+  files:
+    - build/*
+    - doc/swagger/*

@@ -1,0 +1,25 @@
+version: "3.3"
+
+services:
+  hexagonal-scaffolding:
+    restart: "always"
+    build: 
+        context: .
+    args:
+        APPNAME: $APPNAME #Name of the app for the building
+        ID_AWS_ACCOUNT_ECR: $ID_AWS_ACCOUNT_ECR #ID ECR prod or stage / staging 240415772733 / prod 763312739895
+    platform: linux/x86_64 #If you proccesor is ARM64(M1 or M2)
+    stdin_open: true
+    tty: true
+    ports:
+      - "3001:80"
+    networks:
+      - msa-cln
+    environment:
+      AWS_CLI_ACCOUNT: ""
+      AWS_CLI_TOKEN: ""
+      APPNAME: "$APPNAME"
+ 
+networks:
+  msa-cln:
+    external: true

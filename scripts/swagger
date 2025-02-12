@@ -1,0 +1,7 @@
+if [ -f doc/swagger/swagger.json ]; then
+   rm -f doc/swagger/swagger.json
+fi
+
+echo "Running swagger generate"
+swagger generate spec -o ./doc/swagger/swagger.json --scan-models
+echo "swagger json generated"

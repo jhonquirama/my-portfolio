@@ -1,0 +1,6 @@
+protoc -I ./internal/${PROTOC_TARGET}/infrastructure/pb  \
+		--go_out ./internal/${PROTOC_TARGET}/infrastructure/pb  \
+		--go_opt paths=source_relative \
+		--go-grpc_out ./internal/${PROTOC_TARGET}/infrastructure/pb  \
+		--go-grpc_opt paths=source_relative \
+		./internal/${PROTOC_TARGET}/infrastructure/pb/*.proto 

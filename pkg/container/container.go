@@ -3,9 +3,9 @@ package container
 import (
 	"context"
 
-	healthLogic "github.com/jhonquirama/hexa-scaffolding-ms/internal/health/business/logic"
-	healthPort "github.com/jhonquirama/hexa-scaffolding-ms/internal/health/business/port"
-	config "github.com/jhonquirama/hexa-scaffolding-ms/pkg/settings"
+	healthLogic "github.com/jhonquirama/my-portfolio/internal/health/business/logic"
+	healthPort "github.com/jhonquirama/my-portfolio/internal/health/business/port"
+	config "github.com/jhonquirama/my-portfolio/pkg/settings"
 )
 
 type (

@@ -7,9 +7,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	customError "github.com/jhonquirama/hexa-scaffolding-ms/pkg/error"
-	customLogger "github.com/jhonquirama/hexa-scaffolding-ms/pkg/log"
-	apm "github.com/jhonquirama/hexa-scaffolding-ms/pkg/monitor/elastic-apm"
+	customError "github.com/jhonquirama/my-portfolio/pkg/error"
+	customLogger "github.com/jhonquirama/my-portfolio/pkg/log"
+	apm "github.com/jhonquirama/my-portfolio/pkg/monitor/elastic-apm"
 )
 
 const (

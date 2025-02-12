@@ -1,4 +1,4 @@
-APPNAME ?= hexagonal-scaffolding
+APPNAME ?= my-portfolio
 
 # used by `test` target
 export REPORTS_DIR=./reports

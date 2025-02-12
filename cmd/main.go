@@ -1,6 +1,6 @@
-// hexagonal-scaffolding.
+// my-portfolio.
 //
-// API to create scaffolding example with hexagonal architecture
+// API to create my portfolio with hexagonal architecture
 //
 //     Schemes: https
 //     BasePath: /
@@ -22,8 +22,8 @@ package main
 import (
 	"context"
 
-	customLogger "github.com/jhonquirama/hexagonal-scaffolding/pkg/log"
-	runner "github.com/jhonquirama/hexagonal-scaffolding/runners"
+	customLogger "github.com/jhonquirama/my-portfolio/pkg/log"
+	runner "github.com/jhonquirama/my-portfolio/runners"
 )
 
 func main() {

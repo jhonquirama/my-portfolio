@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	customLogger "github.com/jhonquirama/hexa-scaffolding-ms/pkg/log"
-	"github.com/jhonquirama/hexa-scaffolding-ms/pkg/server"
+	customLogger "github.com/jhonquirama/my-portfolio/pkg/log"
+	"github.com/jhonquirama/my-portfolio/pkg/server"
 )
 
 type defaultRunner struct {

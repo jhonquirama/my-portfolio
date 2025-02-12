@@ -3,9 +3,9 @@ package logic
 import (
 	"context"
 
-	healthModel "github.com/jhonquirama/hexa-scaffolding-ms/internal/health/business/model"
-	healthPort "github.com/jhonquirama/hexa-scaffolding-ms/internal/health/business/port"
-	apm "github.com/jhonquirama/hexa-scaffolding-ms/pkg/monitor/elastic-apm"
+	healthModel "github.com/jhonquirama/my-portfolio/internal/health/business/model"
+	healthPort "github.com/jhonquirama/my-portfolio/internal/health/business/port"
+	apm "github.com/jhonquirama/my-portfolio/pkg/monitor/elastic-apm"
 )
 
 type healthService struct {

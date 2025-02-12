@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	apm "github.com/jhonquirama/hexagonal-scaffolding/pkg/monitor/elastic-apm"
+	apm "github.com/jhonquirama/my-portfolio/pkg/monitor/elastic-apm"
 	"google.golang.org/grpc/codes"
 )
 

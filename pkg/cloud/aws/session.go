@@ -5,7 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
-	customLogger "github.com/jhonquirama/hexagonal-scaffolding/pkg/log"
+	customLogger "github.com/jhonquirama/my-portfolio/pkg/log"
 )
 
 func NewSession(ctx context.Context, awsRegion string) session.Session {

@@ -3,7 +3,7 @@ package port
 import (
 	"context"
 
-	healthModel "github.com/jhonquirama/hexa-scaffolding-ms/internal/health/business/model"
+	healthModel "github.com/jhonquirama/my-portfolio/internal/health/business/model"
 )
 
 //go:generate mockery --name HealthService

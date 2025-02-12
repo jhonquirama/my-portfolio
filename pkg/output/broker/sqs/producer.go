@@ -8,9 +8,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/sqs"
 
-	awsCloud "github.com/jhonquirama/hexagonal-scaffolding/pkg/cloud/aws"
-	customError "github.com/jhonquirama/hexagonal-scaffolding/pkg/error"
-	customLogger "github.com/jhonquirama/hexagonal-scaffolding/pkg/log"
+	awsCloud "github.com/jhonquirama/my-portfolio/pkg/cloud/aws"
+	customError "github.com/jhonquirama/my-portfolio/pkg/error"
+	customLogger "github.com/jhonquirama/my-portfolio/pkg/log"
 )
 
 type ProducerConfig interface {

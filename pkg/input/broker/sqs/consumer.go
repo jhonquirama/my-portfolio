@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/sqs"
 
-	awsCloud "github.com/jhonquirama/hexa-scaffolding-ms/pkg/cloud/aws"
+	awsCloud "github.com/jhonquirama/my-portfolio/pkg/cloud/aws"
 )
 
 type (

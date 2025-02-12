@@ -8,9 +8,9 @@ import (
 
 	logrus "github.com/sirupsen/logrus"
 
-	customError "github.com/jhonquirama/hexa-scaffolding-ms/pkg/error"
-	apm "github.com/jhonquirama/hexa-scaffolding-ms/pkg/monitor/elastic-apm"
-	"github.com/jhonquirama/hexa-scaffolding-ms/pkg/output/notify/slack"
+	customError "github.com/jhonquirama/my-portfolio/pkg/error"
+	apm "github.com/jhonquirama/my-portfolio/pkg/monitor/elastic-apm"
+	"github.com/jhonquirama/my-portfolio/pkg/output/notify/slack"
 )
 
 type Option func(l *option)
@@ -48,9 +48,8 @@ var (
 	}
 )
 
-func SetEnvironment(env string, slack2 slack.Slack) {
+func SetEnvironment(env string) {
 	environment = env
-	slackClient = slack2
 }
 
 func Error(ctx context.Context, err error, options ...Option) {
@@ -69,7 +68,6 @@ func Error(ctx context.Context, err error, options ...Option) {
 	if externalError := customError.ExternalError(err); externalError != nil &&
 		(optional.Send == nil || *optional.Send) &&
 		customError.Send(err) {
-		slackClient.PostWebhook(fields)
 	}
 
 	logger.WithContext(ctx).WithFields(fields).Error(err)
@@ -86,10 +84,6 @@ func Info(ctx context.Context, message string, options ...Option) {
 
 	fields := getFields(optional.Object)
 	fields["message"] = message
-
-	if optional.Send != nil && *optional.Send {
-		slackClient.PostWebhook(fields)
-	}
 
 	logger.WithContext(ctx).WithFields(fields).Info(message)
 }
@@ -108,7 +102,6 @@ func Warn(ctx context.Context, err error, options ...Option) {
 	if externalError := customError.ExternalError(err); externalError != nil &&
 		(optional.Send == nil || *optional.Send) &&
 		customError.Send(err) {
-		slackClient.PostWebhook(fields)
 	}
 
 	logger.WithContext(ctx).WithFields(fields).Warn(err)
@@ -128,7 +121,6 @@ func Fatal(ctx context.Context, err error, options ...Option) {
 	if externalError := customError.ExternalError(err); externalError != nil &&
 		(optional.Send == nil || *optional.Send) &&
 		customError.Send(err) {
-		slackClient.PostWebhook(fields)
 	}
 
 	logger.WithContext(ctx).WithFields(fields).Fatal(err)

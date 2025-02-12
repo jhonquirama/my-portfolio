@@ -3,13 +3,12 @@ package server
 import (
 	"context"
 
-	"github.com/jhonquirama/hexa-scaffolding-ms/pkg/container"
-	customLogger "github.com/jhonquirama/hexa-scaffolding-ms/pkg/log"
-	apm "github.com/jhonquirama/hexa-scaffolding-ms/pkg/monitor/elastic-apm"
-	"github.com/jhonquirama/hexa-scaffolding-ms/pkg/output/notify/slack"
-	"github.com/jhonquirama/hexa-scaffolding-ms/pkg/server/gin"
-	lambda "github.com/jhonquirama/hexa-scaffolding-ms/pkg/server/gin-lambda"
-	"github.com/jhonquirama/hexa-scaffolding-ms/pkg/settings"
+	"github.com/jhonquirama/my-portfolio/pkg/container"
+	customLogger "github.com/jhonquirama/my-portfolio/pkg/log"
+	apm "github.com/jhonquirama/my-portfolio/pkg/monitor/elastic-apm"
+	"github.com/jhonquirama/my-portfolio/pkg/server/gin"
+	lambda "github.com/jhonquirama/my-portfolio/pkg/server/gin-lambda"
+	"github.com/jhonquirama/my-portfolio/pkg/settings"
 )
 
 type Server struct {
@@ -40,11 +39,9 @@ func NewServer(ctx context.Context) (*Server, error) {
 		return nil, err
 	}
 
-	slackConfig := slack.NewSlackClient(cnf.Slack())
-
 	tracer.Flush(nil)
 
-	customLogger.SetEnvironment(cnf.ApmConfig().ApmEnvironment(), slackConfig)
+	customLogger.SetEnvironment(cnf.ApmConfig().ApmEnvironment())
 
 	ginServer := gin.NewGinServer(tracer, cnt)
 

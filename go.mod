@@ -1,4 +1,4 @@
-module github.com/jhonquirama/hexagonal-scaffolding
+module github.com/jhonquirama/my-portfolio
 
 go 1.21
 

@@ -3,8 +3,8 @@ package gin
 import (
 	"github.com/gin-gonic/gin"
 
-	apm "github.com/jhonquirama/hexa-scaffolding-ms/pkg/monitor/elastic-apm"
-	ginMiddleware "github.com/jhonquirama/hexa-scaffolding-ms/pkg/server/gin/middleware"
+	apm "github.com/jhonquirama/my-portfolio/pkg/monitor/elastic-apm"
+	ginMiddleware "github.com/jhonquirama/my-portfolio/pkg/server/gin/middleware"
 )
 
 func (s *Server) middlewareConfig() {

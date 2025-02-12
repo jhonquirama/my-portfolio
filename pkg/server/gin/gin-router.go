@@ -3,11 +3,11 @@ package gin
 import (
 	"github.com/gin-gonic/gin"
 
-	healthHandler "github.com/jhonquirama/hexa-scaffolding-ms/internal/health/infrastructure/input/handler/http"
+	healthHandler "github.com/jhonquirama/my-portfolio/internal/health/infrastructure/input/handler/http"
 )
 
 const (
-	v1Group       string = "/v1/hexa-scaffolding-ms"
+	v1Group       string = "/v1/my-portfolio"
 	getHealthPath string = "/health"
 )
 

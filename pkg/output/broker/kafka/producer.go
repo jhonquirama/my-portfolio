@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 
 	kafka "github.com/confluentinc/confluent-kafka-go/v2/kafka"
-	customError "github.com/jhonquirama/hexagonal-scaffolding/pkg/error"
-	apm "github.com/jhonquirama/hexagonal-scaffolding/pkg/monitor/elastic-apm"
+	customError "github.com/jhonquirama/my-portfolio/pkg/error"
+	apm "github.com/jhonquirama/my-portfolio/pkg/monitor/elastic-apm"
 )
 
 type (

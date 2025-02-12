@@ -2,8 +2,8 @@ package gin
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/jhonquirama/hexa-scaffolding-ms/pkg/container"
-	apm "github.com/jhonquirama/hexa-scaffolding-ms/pkg/monitor/elastic-apm"
+	"github.com/jhonquirama/my-portfolio/pkg/container"
+	apm "github.com/jhonquirama/my-portfolio/pkg/monitor/elastic-apm"
 )
 
 type (

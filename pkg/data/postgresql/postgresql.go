@@ -9,7 +9,7 @@ import (
 
 	"github.com/lib/pq"
 
-	apm "github.com/jhonquirama/hexa-scaffolding-ms/pkg/monitor/elastic-apm"
+	apm "github.com/jhonquirama/my-portfolio/pkg/monitor/elastic-apm"
 )
 
 //go:generate mockery --name DB

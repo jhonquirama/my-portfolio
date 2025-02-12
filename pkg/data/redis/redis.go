@@ -5,8 +5,8 @@ import (
 	"time"
 
 	redis "github.com/go-redis/redis/v8"
-	customLogger "github.com/jhonquirama/hexa-scaffolding-ms/pkg/log"
-	apm "github.com/jhonquirama/hexa-scaffolding-ms/pkg/monitor/elastic-apm"
+	customLogger "github.com/jhonquirama/my-portfolio/pkg/log"
+	apm "github.com/jhonquirama/my-portfolio/pkg/monitor/elastic-apm"
 )
 
 var (

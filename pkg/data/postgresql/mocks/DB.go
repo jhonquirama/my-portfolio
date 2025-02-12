@@ -5,7 +5,7 @@ package mocks
 import (
 	context "context"
 
-	postgresql "github.com/jhonquirama/hexa-scaffolding-ms/pkg/data/postgresql"
+	postgresql "github.com/jhonquirama/my-portfolio/pkg/data/postgresql"
 	mock "github.com/stretchr/testify/mock"
 
 	sql "database/sql"

@@ -8,5 +8,5 @@ import (
 
 //go:generate mockery --name UsersService
 type UsersService interface {
-	UsersSingUp(ctx context.Context, data usersModel.UsersSingUpInput) error
+	UsersSignUp(ctx context.Context, data usersModel.UsersSignUpInput) error
 }

@@ -21,7 +21,7 @@ func NewUsersHandler(service UsersPort.UsersService) *UsersHandler {
 	}
 }
 
-// swagger:route GET /my-portfolio/users/sing-up register new users
+// swagger:route GET /my-portfolio/users/sign-up register new users
 //
 // # Create new user
 //
@@ -30,19 +30,19 @@ func NewUsersHandler(service UsersPort.UsersService) *UsersHandler {
 //	201:
 //
 // 400: ErrorResponse
-func (h *UsersHandler) UsersSingUp(c *gin.Context) {
+func (h *UsersHandler) UsersSignUp(c *gin.Context) {
 	var (
 		ctx           = apm.RequestContext(c)
-		userSingUpReq ioModel.UsersSingUpInput
+		userSignUpReq ioModel.UsersSignUpInput
 	)
 
-	if err := c.BindJSON(&userSingUpReq); err != nil {
+	if err := c.BindJSON(&userSignUpReq); err != nil {
 		c.Errors = append(c.Errors,
 			c.Error(CustomCode.New(ctx, CustomCode.RequestBodyValidation, CustomCode.WithMessage(err.Error()))))
 		return
 	}
 
-	err := h.service.UsersSingUp(ctx, ioModel.MapUsersSingUpIOModelToSingUpModel(userSingUpReq))
+	err := h.service.UsersSignUp(ctx, ioModel.MapUsersSignUpIOModelToSignUpModel(userSignUpReq))
 	if err != nil {
 		c.Errors = append(c.Errors, c.Error(err))
 		return

@@ -25,8 +25,8 @@ func NewUsersService(usersRepository usersPort.UsersRepository, dbAuthRepository
 	}
 }
 
-func (svc *usersService) UsersSingUp(ctx context.Context,
-	user usersModel.UsersSingUpInput) error {
+func (svc *usersService) UsersSignUp(ctx context.Context,
+	user usersModel.UsersSignUpInput) error {
 	_, err := svc.cognitoAuth.SignUp(ctx, user)
 	if err != nil {
 		return err

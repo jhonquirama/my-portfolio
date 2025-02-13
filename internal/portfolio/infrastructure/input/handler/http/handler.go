@@ -1,24 +1,22 @@
 package handler
 
 import (
+	userModel "github.com/jhonquirama/my-portfolio/internal/portfolio/business/model"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
-	userModel "github.com/jhonquirama/my-portfolio/internal/health/business/model"
-	userPort "github.com/jhonquirama/my-portfolio/internal/health/business/port"
-	ioModel "github.com/jhonquirama/my-portfolio/internal/health/infrastructure/input/handler/http/iomodel"
+	portfolioPort "github.com/jhonquirama/my-portfolio/internal/portfolio/business/port"
+	ioModel "github.com/jhonquirama/my-portfolio/internal/portfolio/infrastructure/input/handler/http/iomodel"
 	apm "github.com/jhonquirama/my-portfolio/pkg/monitor/elastic-apm"
 )
 
-type HealthHandler struct {
-	service userPort.HealthService
+type PortfolioHandler struct {
+	service portfolioPort.PortfolioService
 }
 
-func NewHealthHandler(
-	service userPort.HealthService,
-) *HealthHandler {
-	return &HealthHandler{
+func NewPortfolioHandler(service portfolioPort.PortfolioService) *PortfolioHandler {
+	return &PortfolioHandler{
 		service: service,
 	}
 }
@@ -30,7 +28,7 @@ func NewHealthHandler(
 //	Responses:
 //		200: Health
 //		400: ErrorResponse
-func (h *HealthHandler) GetHealth(g *gin.Context) {
+func (h *PortfolioHandler) GetHealth(g *gin.Context) {
 	var (
 		ctx    = apm.RequestContext(g)
 		health userModel.Health

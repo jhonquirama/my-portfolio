@@ -1,7 +1,7 @@
 package iomodel
 
 import (
-	healthModel "github.com/jhonquirama/my-portfolio/internal/health/business/model"
+	healthModel "github.com/jhonquirama/my-portfolio/internal/portfolio/business/model"
 )
 
 func ToGetHealthModel() healthModel.GetHealth {

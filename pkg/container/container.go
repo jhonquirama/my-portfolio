@@ -2,31 +2,72 @@ package container
 
 import (
 	"context"
-
 	healthLogic "github.com/jhonquirama/my-portfolio/internal/health/business/logic"
 	healthPort "github.com/jhonquirama/my-portfolio/internal/health/business/port"
+	portfolioLogic "github.com/jhonquirama/my-portfolio/internal/portfolio/business/logic"
+	portfolioPort "github.com/jhonquirama/my-portfolio/internal/portfolio/business/port"
+	"github.com/jhonquirama/my-portfolio/internal/users/business/logic"
+	usersPort "github.com/jhonquirama/my-portfolio/internal/users/business/port"
+	cognito2 "github.com/jhonquirama/my-portfolio/internal/users/infrastructure/output/client/cognito"
+	dynamodb2 "github.com/jhonquirama/my-portfolio/internal/users/infrastructure/output/data/dynamodb"
+	"github.com/jhonquirama/my-portfolio/pkg/cloud/aws/cognito"
+	"github.com/jhonquirama/my-portfolio/pkg/data/dynamodb"
 	config "github.com/jhonquirama/my-portfolio/pkg/settings"
 )
 
 type (
 	Container interface {
 		HealthService() healthPort.HealthService
+		PortfolioService() portfolioPort.PortfolioService
+		UsersService() usersPort.UsersService
+	}
+	health struct {
+		service healthPort.HealthService
+	}
+	portfolio struct {
+		service portfolioPort.PortfolioService
+	}
+	users struct {
+		service usersPort.UsersService
+	}
+	container struct {
+		health    health
+		portfolio portfolio
+		users     users
 	}
 )
-type health struct {
-	service healthPort.HealthService
-}
 
-type container struct {
-	health health
-}
+func NewContainer(ctx context.Context, cnf config.Config) (Container, error) {
+	cognitoClient, err := cognito.NewCognito(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-func NewContainer(_ context.Context, _ config.Config) (Container, error) {
+	cognitoRepository := cognito2.NewCognitoRepository(cognitoClient, cnf.CognitoConfig())
+
+	dynamoDB, err := dynamodb.NewDynamoDB(ctx, cnf.DynamodbClientConfig())
+	if err != nil {
+		return nil, err
+	}
+
+	dynamodbRepository := dynamodb2.NewAuthDynamoRepository(cnf.DynamodbConfig(), dynamoDB)
+
 	healthService := healthLogic.NewHealthService(nil)
+	portfolioService := portfolioLogic.NewPortfolioService(nil)
+	usersService := logic.NewUsersService(nil, dynamodbRepository, cognitoRepository)
 
-	return &container{health: health{service: healthService}}, nil
+	return &container{
+		health:    health{service: healthService},
+		portfolio: portfolio{service: portfolioService},
+		users:     users{service: usersService}}, nil
 }
 
 func (c container) HealthService() healthPort.HealthService {
 	return c.health.service
+}
+func (c container) PortfolioService() portfolioPort.PortfolioService {
+	return c.portfolio.service
+}
+func (c container) UsersService() usersPort.UsersService {
+	return c.users.service
 }

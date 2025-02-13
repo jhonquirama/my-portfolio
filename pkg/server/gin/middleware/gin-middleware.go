@@ -48,7 +48,7 @@ func MiddlewareTracking(c *gin.Context) {
 		c.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 
 		body := map[string]interface{}{}
-		array := []map[string]interface{}{}
+		var array []map[string]interface{}
 		if err := json.Unmarshal(bodyBytes, &body); err == nil && len(body) > 0 {
 			if out, err := json.Marshal(body); err == nil {
 				tx.SetLabel(requestBodyLabel, string(out))

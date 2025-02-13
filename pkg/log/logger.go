@@ -10,7 +10,6 @@ import (
 
 	customError "github.com/jhonquirama/my-portfolio/pkg/error"
 	apm "github.com/jhonquirama/my-portfolio/pkg/monitor/elastic-apm"
-	"github.com/jhonquirama/my-portfolio/pkg/output/notify/slack"
 )
 
 type Option func(l *option)
@@ -33,7 +32,6 @@ func Send(send bool) Option {
 }
 
 var (
-	slackClient slack.Slack       //nolint: gochecknoglobals
 	environment string            // nolint: gochecknoglobals
 	logger      = &logrus.Logger{ // nolint: gochecknoglobals
 		Out:   os.Stderr,

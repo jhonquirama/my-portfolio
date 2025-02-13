@@ -14,7 +14,7 @@ type (
 	}
 )
 
-func NewHealthService(
+func NewPortfolioService(
 	portfolioRepository portfolioPort.PortfolioRepository,
 ) portfolioPort.PortfolioService {
 	return &portfolioService{

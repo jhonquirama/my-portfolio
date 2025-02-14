@@ -24,10 +24,6 @@ jobs:
       - name: Build
         run: |
           make build
-      - name: Install golangci-lint
-        run: |
-          go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-          echo "$HOME/go/bin" >> $GITHUB_PATH
 
       - name: Lint
         run: |

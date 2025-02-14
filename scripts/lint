@@ -5,7 +5,7 @@ set -o nounset
 # shellcheck disable=SC2046
 curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin "${GOLANGCILINT_VERSION}"
 
-# make reports directory (if it doesn't exist)
+# make reports directory (if it doesn't exist )
 mkdir -p ${REPORTS_DIR}
 
 echo "Running golangci-lint"

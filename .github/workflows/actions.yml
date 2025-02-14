@@ -1,5 +1,5 @@
-name: GO WORKFLOWS
-'on':
+name: test-lint-build
+on:
   push:
     branches:
       - master
@@ -8,24 +8,38 @@ name: GO WORKFLOWS
     branches:
       - master
       - develop
-permissions:
-  contents: read
-  pull-requests: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: public.ecr.aws/c1k2r5t6/golang-blt:golang-1.19-alpine
+    env:
+      GOPRIVATE: github.com/jhonquirama
+      REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
+      RESTPORT: 8080
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: '1.22'
-      - name: Dependency Review
-        uses: actions/dependency-review-action@v4
-        with:
-          comment-summary-in-pr: always
+      - run: git config --global url.https://$REPO_TOKEN@github.com/jhonquirama/.insteadOf https://github.com/jhonquirama/
+      - uses: actions/checkout@v4
+
       - name: Build
-        run: go build -v ./...
-      - name: Test
-        run: go test -v ./...
+        run: |
+          make aws_build
+
+      - name: Lint
+        run: |
+          export GO111MODULE=off
+          make lint
+      - name: Unit tests
+        run: |
+          go test -tags musl ./... -coverprofile coverage.out -covermode count
+          go tool cover -func coverage.out
+      - name: Quality Gate - Test coverage shall be above threshold
+        env:
+          TESTCOVERAGE_THRESHOLD: 80
+        run: |
+          echo "Quality Gate: checking test coverage is above threshold ..."
+          echo "Threshold             : $TESTCOVERAGE_THRESHOLD %"
+          totalCoverage=`go tool cover -func=coverage.out | grep total | grep -Eo '[0-9]+\.[0-9]+'`
+          echo "Current test coverage : $totalCoverage %"

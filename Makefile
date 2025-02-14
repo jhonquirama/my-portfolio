@@ -15,4 +15,8 @@ build: clean
 	mkdir -p build
 	GOOS=$(GOOS) GOARCH=$(GOARCH) APPNAME=$(APPNAME) ./scripts/build
 
-.PHONY: lint build
+aws_build:  clean
+	mkdir -p build
+	GOOS=linux GOARCH=amd64 APPNAME=$(APPNAME) ./scripts/build
+
+.PHONY: lint clean build aws_build

@@ -8,4 +8,11 @@ export GOLANGCILINT_VERSION=v1.55.1
 lint:
 	./scripts/lint
 
-.PHONY: lint
+clean:
+	APPNAME=$(APPNAME) ./scripts/clean
+
+build: clean
+	mkdir -p build
+	GOOS=$(GOOS) GOARCH=$(GOARCH) APPNAME=$(APPNAME) ./scripts/build
+
+.PHONY: lint clean build

@@ -23,5 +23,6 @@ fi
 export CGO_ENABLED=1
 
 echo "Go building app"
-go build -tags musl -ldflags '-extldflags "-static" -linkmode external -w -s' -o build/${APPNAME} ./cmd/main.go
+# shellcheck disable=SC2016
+go build -tags musl -ldflags '-extldflags "-static" -linkmode external -w -s -X main.Version=${VERSION}' -o build/${APPNAME} ./cmd/main.go
 echo "Successfully built, exiting build script"

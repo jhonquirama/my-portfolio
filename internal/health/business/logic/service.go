@@ -5,7 +5,6 @@ import (
 
 	healthModel "github.com/jhonquirama/my-portfolio/internal/health/business/model"
 	healthPort "github.com/jhonquirama/my-portfolio/internal/health/business/port"
-	apm "github.com/jhonquirama/my-portfolio/pkg/monitor/elastic-apm"
 )
 
 type healthService struct {
@@ -20,10 +19,7 @@ func NewHealthService(
 	}
 }
 
-func (svc *healthService) GetHealth(ctx context.Context, filter healthModel.GetHealth) (healthModel.Health, error) {
-	_ = filter
-	span, _ := apm.NewSpan(ctx, apm.Service)
-	defer span.End()
+func (svc *healthService) GetHealth(_ context.Context, _ healthModel.GetHealth) (healthModel.Health, error) {
 	return healthModel.Health{
 		Status: "Ok",
 	}, nil

@@ -13,7 +13,7 @@ type (
 	}
 )
 
-func NewAuthDynamoRepository(c Config, dbClient noSql.Dynamodb) authPort.DBAuthRepository {
+func NewAuthDynamoRepository(_ Config, dbClient noSql.Dynamodb) authPort.DBAuthRepository {
 	return &dbAuthRepository{
 		dbClient: dbClient,
 	}

@@ -4,8 +4,8 @@ import (
 	usersModel "github.com/jhonquirama/my-portfolio/internal/users/business/model"
 )
 
-func MapUsersSingUpIOModelToSingUpModel(info UsersSingUpInput) usersModel.UsersSingUpInput {
-	return usersModel.UsersSingUpInput{
+func MapUsersSignUpIOModelToSignUpModel(info UsersSignUpInput) usersModel.UsersSignUpInput {
+	return usersModel.UsersSignUpInput{
 		UserName:     info.Name,
 		UserEmail:    info.Email,
 		UserPassword: info.Password,

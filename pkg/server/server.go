@@ -2,10 +2,9 @@ package server
 
 import (
 	"context"
-
 	"github.com/jhonquirama/my-portfolio/pkg/container"
 	customLogger "github.com/jhonquirama/my-portfolio/pkg/log"
-	apm "github.com/jhonquirama/my-portfolio/pkg/monitor/elastic-apm"
+	"github.com/jhonquirama/my-portfolio/pkg/monitor/observability"
 	"github.com/jhonquirama/my-portfolio/pkg/server/gin"
 	lambda "github.com/jhonquirama/my-portfolio/pkg/server/gin-lambda"
 	"github.com/jhonquirama/my-portfolio/pkg/settings"
@@ -18,28 +17,22 @@ type Server struct {
 }
 
 func NewServer(ctx context.Context) (*Server, error) {
-	var (
-		cnf    settings.Config
-		cnt    container.Container
-		tracer *apm.Tracer
-		err    error
-	)
-
-	if cnf, err = settings.NewConfigFromFile(); err != nil {
+	cnf, err := settings.NewConfigFromFile()
+	if err != nil {
 		if cnf, err = settings.NewConfigFromSystemManager(ctx); err != nil {
 			return nil, err
 		}
 	}
 
-	if cnt, err = container.NewContainer(ctx, cnf); err != nil {
+	cnt, err := container.NewContainer(ctx, cnf)
+	if err != nil {
 		return nil, err
 	}
 
-	if tracer, err = apm.NewAPM(cnf.ApmConfig()); err != nil {
+	tracer, err := observability.NewProvider(ctx, cnf.ApmConfig())
+	if err != nil {
 		return nil, err
 	}
-
-	tracer.Flush(nil)
 
 	customLogger.SetEnvironment(cnf.ApmConfig().ApmEnvironment())
 

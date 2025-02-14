@@ -6,7 +6,7 @@ import (
 )
 
 type (
-	UsersSingUpInput struct {
+	UsersSignUpInput struct {
 		UserName       string
 		UserEmail      string
 		UserPassword   string
@@ -14,7 +14,7 @@ type (
 		UserAttributes map[string]string
 	}
 
-	UsersSingUpOutput struct {
+	UsersSignUpOutput struct {
 		UserConfirmed       bool
 		UserSub             string
 		CodeDeliveryDetails *types.CodeDeliveryDetailsType

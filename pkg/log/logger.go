@@ -9,7 +9,6 @@ import (
 	logrus "github.com/sirupsen/logrus"
 
 	customError "github.com/jhonquirama/my-portfolio/pkg/error"
-	apm "github.com/jhonquirama/my-portfolio/pkg/monitor/elastic-apm"
 )
 
 type Option func(l *option)
@@ -55,18 +54,12 @@ func Error(ctx context.Context, err error, options ...Option) {
 		optional option
 	)
 
-	for _, option := range options {
-		option(&optional)
+	for _, item := range options {
+		item(&optional)
 	}
 
 	fields := getFields(optional.Object)
 	maps.Copy(fields, getErrorFields(err))
-	maps.Copy(fields, getContextFields(ctx))
-
-	if externalError := customError.ExternalError(err); externalError != nil &&
-		(optional.Send == nil || *optional.Send) &&
-		customError.Send(err) {
-	}
 
 	logger.WithContext(ctx).WithFields(fields).Error(err)
 }
@@ -97,11 +90,6 @@ func Warn(ctx context.Context, err error, options ...Option) {
 
 	fields := getFields(optional.Object)
 
-	if externalError := customError.ExternalError(err); externalError != nil &&
-		(optional.Send == nil || *optional.Send) &&
-		customError.Send(err) {
-	}
-
 	logger.WithContext(ctx).WithFields(fields).Warn(err)
 }
 
@@ -115,11 +103,6 @@ func Fatal(ctx context.Context, err error, options ...Option) {
 	}
 
 	fields := getFields(optional.Object)
-
-	if externalError := customError.ExternalError(err); externalError != nil &&
-		(optional.Send == nil || *optional.Send) &&
-		customError.Send(err) {
-	}
 
 	logger.WithContext(ctx).WithFields(fields).Fatal(err)
 }
@@ -153,26 +136,6 @@ func getErrorFields(err error) logrus.Fields {
 	externalError := customError.ExternalError(err)
 	if externalError != nil {
 		fields["error.original"] = externalError
-	}
-
-	return fields
-}
-
-func getContextFields(ctx context.Context) logrus.Fields {
-	fields := logrus.Fields{}
-	if ctx == nil {
-		return fields
-	}
-
-	fields = apm.TraceContext(ctx)
-
-	if fields == nil {
-		fields = logrus.Fields{}
-	}
-
-	funcName := apm.GetFuncNameFromCtx(ctx)
-	if funcName != nil && *funcName != "" {
-		fields["func"] = *funcName
 	}
 
 	return fields

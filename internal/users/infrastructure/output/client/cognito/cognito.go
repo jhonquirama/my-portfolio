@@ -7,26 +7,25 @@ import (
 	usersModel "github.com/jhonquirama/my-portfolio/internal/users/business/model"
 	cognitoEntity "github.com/jhonquirama/my-portfolio/internal/users/infrastructure/output/client/cognito/entity"
 	customError "github.com/jhonquirama/my-portfolio/pkg/error"
-	apm "github.com/jhonquirama/my-portfolio/pkg/monitor/elastic-apm"
+	"github.com/jhonquirama/my-portfolio/pkg/monitor/observability"
 )
 
 func (c *cognitoRepository) SignUp(ctx context.Context,
-	data usersModel.UsersSingUpInput) (usersModel.UsersSingUpOutput, error) {
-	span, ctx := apm.NewSpan(ctx, apm.Service)
+	data usersModel.UsersSignUpInput) (usersModel.UsersSignUpOutput, error) {
+	ctx, span := observability.NewSpan(ctx, observability.Client)
 	defer span.End()
-
 	secretHash := c.getSecretHash(data.UserName)
 	data.SecretHash = secretHash
 
-	signUpResult, err := c.cognito.SignUp(ctx, cognitoEntity.SingUpSvcToCognito(data, c.appClientID))
+	signUpResult, err := c.cognito.SignUp(ctx, cognitoEntity.SignUpSvcToCognito(data, c.appClientID))
 	if err != nil {
 		if strings.Contains(err.Error(), "UsernameExistsException") {
-			return usersModel.UsersSingUpOutput{},
+			return usersModel.UsersSignUpOutput{},
 				customError.New(ctx, customError.AuthOTPUserExist, customError.WithError(err))
 		}
-		return usersModel.UsersSingUpOutput{},
+		return usersModel.UsersSignUpOutput{},
 			customError.New(ctx, customError.AuthOTPSingUpUser, customError.WithError(err))
 	}
 
-	return cognitoEntity.SingUpCognitoToSvc(signUpResult), nil
+	return cognitoEntity.SignUpCognitoToSvc(signUpResult), nil
 }

@@ -7,7 +7,7 @@ import (
 	usersModel "github.com/jhonquirama/my-portfolio/internal/users/business/model"
 )
 
-func SingUpSvcToCognito(data usersModel.UsersSingUpInput, clientID string) *cognitoIdentity.SignUpInput {
+func SignUpSvcToCognito(data usersModel.UsersSignUpInput, clientID string) *cognitoIdentity.SignUpInput {
 	return &cognitoIdentity.SignUpInput{
 		ClientId:   aws.String(clientID),
 		Username:   aws.String(data.UserName),
@@ -19,8 +19,8 @@ func SingUpSvcToCognito(data usersModel.UsersSingUpInput, clientID string) *cogn
 	}
 }
 
-func SingUpCognitoToSvc(data *cognitoIdentity.SignUpOutput) usersModel.UsersSingUpOutput {
-	return usersModel.UsersSingUpOutput{
+func SignUpCognitoToSvc(data *cognitoIdentity.SignUpOutput) usersModel.UsersSignUpOutput {
+	return usersModel.UsersSignUpOutput{
 		UserConfirmed:       data.UserConfirmed,
 		UserSub:             *data.UserSub,
 		CodeDeliveryDetails: data.CodeDeliveryDetails,

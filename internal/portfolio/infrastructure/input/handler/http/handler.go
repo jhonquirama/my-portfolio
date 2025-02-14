@@ -8,7 +8,6 @@ import (
 
 	portfolioPort "github.com/jhonquirama/my-portfolio/internal/portfolio/business/port"
 	ioModel "github.com/jhonquirama/my-portfolio/internal/portfolio/infrastructure/input/handler/http/iomodel"
-	apm "github.com/jhonquirama/my-portfolio/pkg/monitor/elastic-apm"
 )
 
 type PortfolioHandler struct {
@@ -30,7 +29,7 @@ func NewPortfolioHandler(service portfolioPort.PortfolioService) *PortfolioHandl
 //		400: ErrorResponse
 func (h *PortfolioHandler) GetHealth(g *gin.Context) {
 	var (
-		ctx    = apm.RequestContext(g)
+		ctx    = g.Request.Context()
 		health userModel.Health
 		err    error
 	)

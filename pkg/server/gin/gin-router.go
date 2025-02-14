@@ -1,7 +1,6 @@
 package gin
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	usersHandler "github.com/jhonquirama/my-portfolio/internal/users/infrastructure/input/handler/http"
 
@@ -10,11 +9,11 @@ import (
 
 const (
 	v1Group string = "/v1/my-portfolio"
-	//HS
+	// HS
 	getHealthPath string = "/health"
 
 	// USERS
-	usersPathSingUp string = "/users/sing-up"
+	usersPathSignUp string = "/users/sign-up"
 )
 
 func (s *Server) routerConfig() {
@@ -32,14 +31,10 @@ func (s *Server) healthRoutes(api *gin.RouterGroup) {
 	}
 }
 
-func (s *Server) portfolioRoutes(api *gin.RouterGroup) {
-}
-
 func (s *Server) usersRoutes(api *gin.RouterGroup) {
 	routes := api.Group(v1Group)
-	fmt.Println(routes)
 	{
 		newUsersHandler := usersHandler.NewUsersHandler(s.Container.UsersService())
-		routes.POST(usersPathSingUp, newUsersHandler.UsersSingUp)
+		routes.POST(usersPathSignUp, newUsersHandler.UsersSignUp)
 	}
 }

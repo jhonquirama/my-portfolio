@@ -2,6 +2,8 @@ module github.com/jhonquirama/my-portfolio
 
 go 1.22.0
 
+toolchain go1.22.5
+
 require (
 	github.com/aws/aws-lambda-go v1.32.0
 	github.com/aws/aws-sdk-go v1.44.24

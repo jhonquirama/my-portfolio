@@ -13,7 +13,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: public.ecr.aws/c1k2r5t6/golang-blt:golang-1.19-alpine
+      image: public.ecr.aws/c1k2r5t6/golang-blt:golang-1.23-alpine
     env:
       GOPRIVATE: github.com/jhonquirama
       REPO_TOKEN: ${{ secrets.REPO_TOKEN }}

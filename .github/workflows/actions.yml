@@ -25,7 +25,7 @@ jobs:
 
       - name: Build
         run: |
-          make aws_build
+          make build
 
       - name: Lint
         run: |

@@ -4,6 +4,7 @@ import (
 	"context"
 	usersModel "github.com/jhonquirama/my-portfolio/internal/users/business/model"
 	usersPort "github.com/jhonquirama/my-portfolio/internal/users/business/port"
+	"github.com/jhonquirama/my-portfolio/pkg/monitor/observability"
 )
 
 type (
@@ -25,8 +26,9 @@ func NewUsersService(usersRepository usersPort.UsersRepository, dbAuthRepository
 	}
 }
 
-func (svc *usersService) UsersSignUp(ctx context.Context,
-	user usersModel.UsersSignUpInput) error {
+func (svc *usersService) UsersSignUp(ctx context.Context, user usersModel.UsersSignUpInput) error {
+	ctx, span := observability.NewSpan(ctx, observability.Service)
+	defer span.End()
 	_, err := svc.cognitoAuth.SignUp(ctx, user)
 	if err != nil {
 		return err

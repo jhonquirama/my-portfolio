@@ -7,14 +7,13 @@ import (
 	usersModel "github.com/jhonquirama/my-portfolio/internal/users/business/model"
 	cognitoEntity "github.com/jhonquirama/my-portfolio/internal/users/infrastructure/output/client/cognito/entity"
 	customError "github.com/jhonquirama/my-portfolio/pkg/error"
-	apm "github.com/jhonquirama/my-portfolio/pkg/monitor/elastic-apm"
+	"github.com/jhonquirama/my-portfolio/pkg/monitor/observability"
 )
 
 func (c *cognitoRepository) SignUp(ctx context.Context,
 	data usersModel.UsersSignUpInput) (usersModel.UsersSignUpOutput, error) {
-	span, ctx := apm.NewSpan(ctx, apm.Service)
+	ctx, span := observability.NewSpan(ctx, observability.Client)
 	defer span.End()
-
 	secretHash := c.getSecretHash(data.UserName)
 	data.SecretHash = secretHash
 

@@ -8,7 +8,6 @@ import (
 
 	UsersPort "github.com/jhonquirama/my-portfolio/internal/users/business/port"
 	ioModel "github.com/jhonquirama/my-portfolio/internal/users/infrastructure/input/handler/http/iomodel"
-	apm "github.com/jhonquirama/my-portfolio/pkg/monitor/elastic-apm"
 )
 
 type UsersHandler struct {
@@ -32,7 +31,7 @@ func NewUsersHandler(service UsersPort.UsersService) *UsersHandler {
 // 400: ErrorResponse
 func (h *UsersHandler) UsersSignUp(c *gin.Context) {
 	var (
-		ctx           = apm.RequestContext(c)
+		ctx           = c.Request.Context()
 		userSignUpReq ioModel.UsersSignUpInput
 	)
 

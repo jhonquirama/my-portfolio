@@ -4,7 +4,6 @@ import (
 	"context"
 	portfolioModel "github.com/jhonquirama/my-portfolio/internal/portfolio/business/model"
 	portfolioPort "github.com/jhonquirama/my-portfolio/internal/portfolio/business/port"
-	apm "github.com/jhonquirama/my-portfolio/pkg/monitor/elastic-apm"
 )
 
 type (
@@ -22,11 +21,8 @@ func NewPortfolioService(
 	}
 }
 
-func (svc *portfolioService) GetHealth(ctx context.Context,
-	filter portfolioModel.GetHealth) (portfolioModel.Health, error) {
-	_ = filter
-	span, _ := apm.NewSpan(ctx, apm.Service)
-	defer span.End()
+func (svc *portfolioService) GetHealth(_ context.Context,
+	_ portfolioModel.GetHealth) (portfolioModel.Health, error) {
 	return portfolioModel.Health{
 		Status: "Ok",
 	}, nil

@@ -2,10 +2,9 @@ package errors
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
-	apm "github.com/jhonquirama/my-portfolio/pkg/monitor/elastic-apm"
+	apm "github.com/jhonquirama/my-portfolio/pkg/monitor/observability"
 	"google.golang.org/grpc/codes"
 )
 
@@ -33,9 +32,8 @@ type (
 	}
 )
 
-func New(c context.Context, code CustomCode, opts ...Option) error {
+func New(ctx context.Context, code CustomCode, opts ...Option) error {
 	var (
-		ctx       = apm.DetachedContext(c)
 		skip      = 1
 		customErr = getDefinition(code)
 		options   = option{}
@@ -53,41 +51,19 @@ func New(c context.Context, code CustomCode, opts ...Option) error {
 	customErr.stacktrace = fmt.Sprintf("%s:%d", funcName, line)
 	customErr.code = code
 	customErr.ctx = ctx
-	customErr.traceID = apm.TraceIDContext(ctx)
-	customErr.transactionID = apm.TransactionIDContext(ctx)
-	customErr.spanID = apm.SpanIDContext(ctx)
 
 	fillWithOptions(ctx, options, &customErr)
-
-	apm.CaptureError(ctx, &customErr)
 
 	return &customErr
 }
 
-func fillWithOptions(ctx context.Context, options option, customErr *Error) {
+func fillWithOptions(_ context.Context, options option, customErr *Error) {
 	if options.message != "" {
 		customErr.message = options.message
 	}
 
 	if options.httpCode > 0 {
 		customErr.httpCode = options.httpCode
-	}
-
-	if options.externalError != nil {
-		customErr.externalError = options.externalError
-
-		tx := apm.TransactionFromContext(ctx)
-
-		if tx != nil && tx.Transaction != nil && tx.TransactionData != nil {
-			tx.SetLabel("error", customErr.externalError)
-			tx.SetLabel("error.stack", customErr.stacktrace)
-		}
-
-		span := apm.SpanFromContext(ctx)
-		if span != nil && span.Span != nil && span.SpanData != nil {
-			span.SetLabel("error", customErr.externalError)
-			span.SetLabel("stack", customErr.stacktrace)
-		}
 	}
 
 	customErr.send = options.send
@@ -154,19 +130,4 @@ func Send(err error) bool {
 		return *parseErr.send
 	}
 	return true
-}
-
-func UnmarshalJSON(ctx context.Context, data []byte, httpCode int) error {
-	var response ErrorResponse
-	if err := json.Unmarshal(data, &response); err != nil {
-		return New(ctx, UnknownError, WithError(err), WithMessage(string(data)))
-	} else if response.Code == "" {
-		return New(ctx, UnknownError, WithMessage(string(data)))
-	}
-
-	return New(ctx,
-		CustomCode(response.Code),
-		WithMessage(response.Message),
-		withHTTPCode(httpCode),
-	)
 }

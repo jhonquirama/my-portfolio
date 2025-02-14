@@ -1,20 +1,21 @@
 package gin
 
 import (
+	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/jhonquirama/my-portfolio/pkg/container"
-	apm "github.com/jhonquirama/my-portfolio/pkg/monitor/elastic-apm"
+	"github.com/jhonquirama/my-portfolio/pkg/monitor/observability"
 )
 
 type (
 	Server struct {
 		Engine    *gin.Engine
-		Apm       *apm.Tracer
+		Apm       *observability.Provider
 		Container container.Container
 	}
 )
 
-func NewGinServer(tracer *apm.Tracer, container container.Container) *Server {
+func NewGinServer(tracer *observability.Provider, container container.Container) *Server {
 	server := &Server{
 		Engine:    gin.Default(),
 		Apm:       tracer,
@@ -29,6 +30,17 @@ func NewGinServer(tracer *apm.Tracer, container container.Container) *Server {
 }
 
 func (s *Server) Run(address string) error {
-	defer s.Apm.Close()
+	// register tracing provider as a global provider
+	stopTracingProvider, err := s.Apm.RegisterAsGlobal()
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err = stopTracingProvider(context.Background()); err != nil {
+			return
+		}
+	}()
+
 	return s.Engine.Run(address)
 }

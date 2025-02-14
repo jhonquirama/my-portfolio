@@ -11,8 +11,8 @@ import (
 	cognito2 "github.com/jhonquirama/my-portfolio/internal/users/infrastructure/output/client/cognito"
 	dynamodb2 "github.com/jhonquirama/my-portfolio/internal/users/infrastructure/output/data/dynamodb"
 	"github.com/jhonquirama/my-portfolio/pkg/cloud/aws/cognito"
+	"github.com/jhonquirama/my-portfolio/pkg/config"
 	"github.com/jhonquirama/my-portfolio/pkg/data/dynamodb"
-	"github.com/jhonquirama/my-portfolio/pkg/settings"
 )
 
 type (
@@ -37,7 +37,7 @@ type (
 	}
 )
 
-func NewContainer(ctx context.Context, cnf settings.Config) (Container, error) {
+func NewContainer(ctx context.Context, cnf config.Config) (Container, error) {
 	cognitoClient, err := cognito.NewCognito(ctx)
 	if err != nil {
 		return nil, err

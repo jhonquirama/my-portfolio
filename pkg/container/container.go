@@ -52,9 +52,9 @@ func NewContainer(ctx context.Context, cnf config.Config) (Container, error) {
 
 	dynamodbRepository := dynamodb2.NewAuthDynamoRepository(cnf.DynamodbConfig(), dynamoDB)
 
-	healthService := healthLogic.NewHealthService(nil)
-	portfolioService := portfolioLogic.NewPortfolioService(nil)
-	usersService := logic.NewUsersService(nil, dynamodbRepository, cognitoRepository)
+	healthService := healthLogic.NewHealthService()
+	portfolioService := portfolioLogic.NewPortfolioService()
+	usersService := logic.NewUsersService(dynamodbRepository, cognitoRepository)
 
 	return &container{
 		health:    health{service: healthService},

@@ -49,3 +49,33 @@ func (h *UsersHandler) UsersSignUp(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, nil)
 }
+
+// swagger:route GET /my-portfolio/users/confirm-sign-up confirm new users
+//
+// # confirm new user
+//
+// Responses:
+//
+//	200:
+//
+// 400: ErrorResponse
+func (h *UsersHandler) UsersConfirmSignUp(c *gin.Context) {
+	var (
+		ctx                  = c.Request.Context()
+		userConfirmSignUpReq ioModel.UsersConfirmSignUpInput
+	)
+
+	if err := c.BindJSON(&userConfirmSignUpReq); err != nil {
+		c.Errors = append(c.Errors,
+			c.Error(CustomCode.New(ctx, CustomCode.RequestBodyValidation, CustomCode.WithMessage(err.Error()))))
+		return
+	}
+
+	err := h.service.UsersConfirmSignUp(ctx, ioModel.MapUsersConfirmSignUpIOModelToSignUpModel(userConfirmSignUpReq))
+	if err != nil {
+		c.Errors = append(c.Errors, c.Error(err))
+		return
+	}
+
+	c.JSON(http.StatusOK, nil)
+}

@@ -1,0 +1,25 @@
+#!/bin/bash
+set -e  # Stop execution if there are errors
+
+echo "Quality Gate: checking test coverage is above threshold ..."
+
+# Check if the coverage file exists before continuing
+if [ ! -f coverage.out ]; then
+    echo "Error: coverage.out not found! Run 'go test -coverprofile=coverage.out' first."
+    exit 1
+fi
+
+# Get the coverage percentage
+totalCoverage=$(go tool cover -func=coverage.out | grep total | grep -Eo '[0-9]+\.[0-9]+')
+
+echo "Threshold             : $totalCoverageTest %"
+echo "Current test coverage : $totalCoverage %"
+
+# Compare against threshold
+threshold=80.0  # Change this depending on the desired threshold
+if (( $(echo "$totalCoverage < $threshold" | bc -l) )); then
+    echo "❌ Test coverage is below threshold ($threshold%)!"
+    exit 1
+else
+    echo "✅ Test coverage is above threshold ($threshold%)!"
+fi

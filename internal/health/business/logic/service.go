@@ -8,15 +8,10 @@ import (
 )
 
 type healthService struct {
-	healthRepository healthPort.HealthRepository
 }
 
-func NewHealthService(
-	healthRepository healthPort.HealthRepository,
-) healthPort.HealthService {
-	return &healthService{
-		healthRepository: healthRepository,
-	}
+func NewHealthService() healthPort.HealthService {
+	return &healthService{}
 }
 
 func (svc *healthService) GetHealth(_ context.Context, _ healthModel.GetHealth) (healthModel.Health, error) {

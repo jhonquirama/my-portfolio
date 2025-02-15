@@ -7,4 +7,7 @@ import (
 type (
 	SignUpInput  *cognitoIdentity.SignUpInput
 	SignUpOutput *cognitoIdentity.SignUpOutput
+
+	ConfirmSignUpInput  *cognitoIdentity.ConfirmSignUpInput
+	ConfirmSignUpOutput *cognitoIdentity.ConfirmSignUpOutput
 )

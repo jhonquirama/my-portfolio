@@ -2,16 +2,15 @@ package cognito
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	cognitoClient "github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
-	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/types"
 	cognitoModel "github.com/jhonquirama/my-portfolio/pkg/cloud/aws/cognito/model"
 )
 
 type (
 	Cognito interface {
 		SignUp(ctx context.Context, input cognitoModel.SignUpInput) (cognitoModel.SignUpOutput, error)
+		ConfirmSignUp(ctx context.Context, input cognitoModel.ConfirmSignUpInput) (cognitoModel.ConfirmSignUpOutput, error)
 	}
 	cognito struct {
 		cognitoClient *cognitoClient.Client
@@ -30,18 +29,10 @@ func NewCognito(ctx context.Context) (Cognito, error) {
 }
 
 func (c *cognito) SignUp(ctx context.Context, input cognitoModel.SignUpInput) (cognitoModel.SignUpOutput, error) {
-	output, err := c.cognitoClient.SignUp(ctx, &cognitoClient.SignUpInput{
-		ClientId: input.ClientId,
-		Password: input.Password,
-		Username: input.Username,
-		UserAttributes: []types.AttributeType{
-			{Name: aws.String("email"), Value: aws.String(input.ClientMetadata["email"])},
-		},
-		SecretHash: input.SecretHash,
-	})
-	if err != nil {
-		return nil, err
-	}
+	return c.cognitoClient.SignUp(ctx, input)
+}
 
-	return output, nil
+func (c *cognito) ConfirmSignUp(ctx context.Context, input cognitoModel.ConfirmSignUpInput,
+) (cognitoModel.ConfirmSignUpOutput, error) {
+	return c.cognitoClient.ConfirmSignUp(ctx, input)
 }

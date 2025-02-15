@@ -81,9 +81,20 @@ func (p *Provider) RegisterAsGlobal() (func(ctx context.Context) error, error) {
 	return p.Provider.Shutdown, nil
 }
 
-func NewSpan(ctx context.Context, spanType SpanType) (context.Context, tc.Span) {
-	ctx, span := tp.Start(ctx, string(spanType))
-	return ctx, span
+type (
+	Span struct {
+		tc.Span
+	}
+)
+
+func NewSpan(ctx context.Context, spanType SpanType) (context.Context, *Span) {
+	span := tc.SpanFromContext(ctx)
+	span.SetAttributes(semconv.ServiceNameKey.String(string(spanType)))
+	return ctx, &Span{span}
+}
+
+func (s *Span) End() {
+	s.Span.End()
 }
 
 func GetCallerName(skip int) (string, int) {

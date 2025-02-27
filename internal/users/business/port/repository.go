@@ -5,9 +5,8 @@ import (
 	usersModel "github.com/jhonquirama/my-portfolio/internal/users/business/model"
 )
 
-//go:generate mockery --name DBAuthRepository
-//go:generate mockery --name CognitoClientAuthRepository
-
+//go:generate mockery --name DBAuthRepository --filename db_repository_mock.go --output ../../../../pkg/mocks/repositories
+//go:generate mockery --name CognitoClientAuthRepository --filename cognito_repository_mock.go --output ../../../../pkg/mocks/repositories
 type (
 	DBAuthRepository interface {
 	}

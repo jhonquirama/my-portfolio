@@ -6,7 +6,7 @@ import (
 	cognitoClient "github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
 	cognitoModel "github.com/jhonquirama/my-portfolio/pkg/cloud/aws/cognito/model"
 )
-
+//go:generate mockery --name Cognito
 type (
 	Cognito interface {
 		SignUp(ctx context.Context, input cognitoModel.SignUpInput) (cognitoModel.SignUpOutput, error)

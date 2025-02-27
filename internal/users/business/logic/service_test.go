@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/jhonquirama/my-portfolio/internal/users/business/model"
-	"github.com/jhonquirama/my-portfolio/internal/users/business/port/mocks"
+	"github.com/jhonquirama/my-portfolio/pkg/mocks/repositories"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"testing"

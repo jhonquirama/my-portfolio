@@ -33,7 +33,7 @@ jobs:
           make lint
       - name: Unit tests
         run: |
-          go test -tags musl ./... -coverprofile coverage.out -covermode count
+          go test -tags musl ./internal/... -coverprofile coverage.out -covermode count
           go tool cover -func coverage.out
       - name: Quality Gate - Test coverage shall be above threshold
         run: |

@@ -45,7 +45,7 @@ func (c *cognitoRepository) ConfirmSignUp(ctx context.Context, data usersModel.U
 				customError.New(ctx, customError.AuthOTPUserExist, customError.WithError(err))
 		}
 		return usersModel.UsersConfirmSignUpOutput{},
-			customError.New(ctx, customError.AuthOTPSingUpUser, customError.WithError(err))
+			customError.New(ctx, customError.AuthOTPSessionNotValid, customError.WithError(err))
 	}
 
 	return cognitoEntity.ConfirmSignUpCognitoToSvc(confirmSignUpResult), nil

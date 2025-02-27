@@ -18,9 +18,8 @@ build: clean
 coverage:
 	./scripts/coverage
 
-
 test-coverage-html:
-	go test ./... -coverprofile=coverage.out && go tool cover -html=coverage.out
+	go test ./internal/... -coverprofile=coverage.out && go tool cover -html=coverage.out
 
 test-coverage-total:
 	go tool cover -func=coverage.out

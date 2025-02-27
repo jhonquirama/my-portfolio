@@ -88,13 +88,21 @@ type (
 )
 
 func NewSpan(ctx context.Context, spanType SpanType) (context.Context, *Span) {
-	span := tc.SpanFromContext(ctx)
-	span.SetAttributes(semconv.ServiceNameKey.String(string(spanType)))
+	if tp == nil {
+		return ctx, &Span{}
+	}
+
+	ctx, span := tp.Start(ctx, string(spanType))
+	funcName, _ := GetCallerName(1)
+
+	span.SetAttributes(semconv.ServiceNameKey.String(funcName))
 	return ctx, &Span{span}
 }
 
 func (s *Span) End() {
-	s.Span.End()
+	if s.Span != nil {
+		s.Span.End()
+	}
 }
 
 func GetCallerName(skip int) (string, int) {

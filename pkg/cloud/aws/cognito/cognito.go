@@ -2,10 +2,12 @@ package cognito
 
 import (
 	"context"
+
 	"github.com/aws/aws-sdk-go-v2/config"
 	cognitoClient "github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
 	cognitoModel "github.com/jhonquirama/my-portfolio/pkg/cloud/aws/cognito/model"
 )
+
 //go:generate mockery --name Cognito
 type (
 	Cognito interface {

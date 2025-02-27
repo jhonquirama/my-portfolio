@@ -50,7 +50,6 @@ func TestNewGetHealth_GetHealth(t *testing.T) {
 			}
 			assert.NoError(t, nil, err)
 			assert.Equal(t, health, tt.out.response)
-
 		})
 	}
 }

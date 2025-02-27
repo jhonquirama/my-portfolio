@@ -36,6 +36,6 @@ issues:
         - typecheck
         - lll
         - gocognit
-    - path: internal/*
+    - path: pkg/*
       linters:
         - typecheck

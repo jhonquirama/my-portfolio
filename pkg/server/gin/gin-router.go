@@ -13,7 +13,8 @@ const (
 	getHealthPath string = "/health"
 
 	// USERS
-	usersPathSignUp string = "/users/sign-up"
+	usersPathSignUp        string = "/users/sign-up"
+	usersPathConfirmSignUp string = "/users/confirm-sign-up"
 )
 
 func (s *Server) routerConfig() {
@@ -36,5 +37,6 @@ func (s *Server) usersRoutes(api *gin.RouterGroup) {
 	{
 		newUsersHandler := usersHandler.NewUsersHandler(s.Container.UsersService())
 		routes.POST(usersPathSignUp, newUsersHandler.UsersSignUp)
+		routes.POST(usersPathConfirmSignUp, newUsersHandler.UsersConfirmSignUp)
 	}
 }

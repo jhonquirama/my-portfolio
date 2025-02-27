@@ -9,16 +9,11 @@ import (
 type (
 	Config           interface{}
 	portfolioService struct {
-		portfolioRepository portfolioPort.PortfolioRepository
 	}
 )
 
-func NewPortfolioService(
-	portfolioRepository portfolioPort.PortfolioRepository,
-) portfolioPort.PortfolioService {
-	return &portfolioService{
-		portfolioRepository: portfolioRepository,
-	}
+func NewPortfolioService() portfolioPort.PortfolioService {
+	return &portfolioService{}
 }
 
 func (svc *portfolioService) GetHealth(_ context.Context,

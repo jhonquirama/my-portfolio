@@ -15,4 +15,13 @@ build: clean
 	mkdir -p build
 	GOOS=$(GOOS) GOARCH=$(GOARCH) APPNAME=$(APPNAME) ./scripts/build
 
-.PHONY: lint clean build
+coverage:
+	./scripts/coverage
+
+test-coverage-html:
+	go test ./internal/... -coverprofile=coverage.out && go tool cover -html=coverage.out
+
+test-coverage-total:
+	go tool cover -func=coverage.out
+
+.PHONY: lint clean build coverage test-coverage-html test-coverage-total

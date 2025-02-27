@@ -33,8 +33,8 @@ func NewCognitoRepository(cognito cognito.Cognito, cf Config) authPort.CognitoCl
 }
 
 func (c *cognitoRepository) getSecretHash(username string) *string {
-	mac := hmac.New(sha256.New, []byte(c.appClientSecret))
-	mac.Write([]byte(username + c.appClientID))
-	secret := base64.StdEncoding.EncodeToString(mac.Sum(nil))
+	hash := hmac.New(sha256.New, []byte(c.appClientSecret))
+	hash.Write([]byte(username + c.appClientID))
+	secret := base64.StdEncoding.EncodeToString(hash.Sum(nil))
 	return &secret
 }

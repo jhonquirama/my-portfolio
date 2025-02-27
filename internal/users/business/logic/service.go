@@ -11,18 +11,16 @@ type (
 	Config       interface{}
 	usersService struct {
 		dbAuthRepository usersPort.DBAuthRepository
-		usersRepository  usersPort.UsersRepository
 		cognitoAuth      usersPort.CognitoClientAuthRepository
 	}
 )
 
-func NewUsersService(usersRepository usersPort.UsersRepository, dbAuthRepository usersPort.DBAuthRepository,
+func NewUsersService(dbAuthRepository usersPort.DBAuthRepository,
 	cognitoAuth usersPort.CognitoClientAuthRepository,
 ) usersPort.UsersService {
 	return &usersService{
 		dbAuthRepository: dbAuthRepository,
 		cognitoAuth:      cognitoAuth,
-		usersRepository:  usersRepository,
 	}
 }
 
@@ -30,6 +28,18 @@ func (svc *usersService) UsersSignUp(ctx context.Context, user usersModel.UsersS
 	ctx, span := observability.NewSpan(ctx, observability.Service)
 	defer span.End()
 	_, err := svc.cognitoAuth.SignUp(ctx, user)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (svc *usersService) UsersConfirmSignUp(ctx context.Context, user usersModel.UsersConfirmSignUpInput) error {
+	ctx, span := observability.NewSpan(ctx, observability.Service)
+	defer span.End()
+
+	_, err := svc.cognitoAuth.ConfirmSignUp(ctx, user)
 	if err != nil {
 		return err
 	}

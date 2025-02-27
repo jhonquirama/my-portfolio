@@ -14,8 +14,8 @@ func (c *cognitoRepository) SignUp(ctx context.Context,
 	data usersModel.UsersSignUpInput) (usersModel.UsersSignUpOutput, error) {
 	ctx, span := observability.NewSpan(ctx, observability.Client)
 	defer span.End()
-	secretHash := c.getSecretHash(data.UserName)
-	data.SecretHash = secretHash
+
+	data.SecretHash = c.getSecretHash(data.UserEmail)
 
 	signUpResult, err := c.cognito.SignUp(ctx, cognitoEntity.SignUpSvcToCognito(data, c.appClientID))
 	if err != nil {
@@ -28,4 +28,25 @@ func (c *cognitoRepository) SignUp(ctx context.Context,
 	}
 
 	return cognitoEntity.SignUpCognitoToSvc(signUpResult), nil
+}
+
+func (c *cognitoRepository) ConfirmSignUp(ctx context.Context, data usersModel.UsersConfirmSignUpInput,
+) (usersModel.UsersConfirmSignUpOutput, error) {
+	ctx, span := observability.NewSpan(ctx, observability.Client)
+	defer span.End()
+
+	data.SecretHash = c.getSecretHash(data.UserEmail)
+
+	confirmSignUpResult, err := c.cognito.
+		ConfirmSignUp(ctx, cognitoEntity.ConfirmSignUpSvcToCognito(data, c.appClientID))
+	if err != nil {
+		if strings.Contains(err.Error(), "UsernameExistsException") {
+			return usersModel.UsersConfirmSignUpOutput{},
+				customError.New(ctx, customError.AuthOTPUserExist, customError.WithError(err))
+		}
+		return usersModel.UsersConfirmSignUpOutput{},
+			customError.New(ctx, customError.AuthOTPSessionNotValid, customError.WithError(err))
+	}
+
+	return cognitoEntity.ConfirmSignUpCognitoToSvc(confirmSignUpResult), nil
 }

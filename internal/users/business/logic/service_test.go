@@ -3,6 +3,8 @@ package logic
 import (
 	"context"
 	"errors"
+	"github.com/davecgh/go-spew/spew"
+	"github.com/google/go-cmp/cmp"
 	"github.com/jhonquirama/my-portfolio/internal/users/business/model"
 	"github.com/jhonquirama/my-portfolio/pkg/mocks/repositories"
 	mocks2 "github.com/jhonquirama/my-portfolio/pkg/monitor/observability/gotel/mocks"
@@ -88,11 +90,12 @@ func TestNewUsersService_UsersConfirmSignUp(t *testing.T) {
 	type (
 		input struct {
 			ctx string // se usa el context para mock
-			req model.UsersConfirmSignUpInput
+			req model.UsersConfirmSignUpInputAndSignInInput
 		}
 		output struct {
-			err error
-			res model.UsersConfirmSignUpOutput
+			errCognitoSignUp, errCognitoSignIn, svcErr error
+			res                                        model.UsersSignInOutput
+			cognitoInitAuthResMock                     model.UsersSignInOutput
 		}
 		test struct {
 			testName string
@@ -105,29 +108,51 @@ func TestNewUsersService_UsersConfirmSignUp(t *testing.T) {
 			testName: "WRONG",
 			in: input{
 				ctx: mockCtx,
-				req: model.UsersConfirmSignUpInput{
-					UserEmail: "ddfdfdfg@gmail.com",
-					UserCode:  "123456",
+				req: model.UsersConfirmSignUpInputAndSignInInput{
+					UserEmail:  "ddfdfdfg@gmail.com",
+					UserCode:   "123456",
+					UserPasswd: "mi11224432234#C",
 				},
 			},
 			out: output{
-				err: errors.New("user error"),
-				res: model.UsersConfirmSignUpOutput{},
+				errCognitoSignUp:       errors.New("user error"),
+				svcErr:                 errors.New("user error"),
+				res:                    model.UsersSignInOutput{},
+				cognitoInitAuthResMock: model.UsersSignInOutput{},
+			},
+		},
+		{
+			testName: "error in Auth",
+			in: input{
+				ctx: mockCtx,
+				req: model.UsersConfirmSignUpInputAndSignInInput{
+					UserEmail: "ddfdfdfg@gmail.com",
+					UserCode:  "12345556",
+				},
+			},
+			out: output{
+				errCognitoSignIn:       errors.New("need password"),
+				svcErr:                 errors.New("need password"),
+				res:                    model.UsersSignInOutput{},
+				cognitoInitAuthResMock: model.UsersSignInOutput{},
 			},
 		},
 		{
 			testName: "OK",
 			in: input{
 				ctx: mockCtx,
-				req: model.UsersConfirmSignUpInput{
+				req: model.UsersConfirmSignUpInputAndSignInInput{
 					UserEmail: "ddfdfdfg@gmail.com",
 					UserCode:  "12345556",
 				},
 			},
 			out: output{
-				err: nil,
-				res: model.UsersConfirmSignUpOutput{
-					UserSession: "dffsdfsdfsdfsdfsdfsdfsdfsdfsd",
+				errCognitoSignUp: nil,
+				res: model.UsersSignInOutput{
+					Token: "dffsdfsdfsdfsdfsdfsdfsdfsdfsd",
+				},
+				cognitoInitAuthResMock: model.UsersSignInOutput{
+					Token: "dffsdfsdfsdfsdfsdfsdfsdfsdfsd",
 				},
 			},
 		},
@@ -140,10 +165,28 @@ func TestNewUsersService_UsersConfirmSignUp(t *testing.T) {
 			svc := NewUsersService(&mocks.DBAuthRepository{}, cognito, trace)
 			mockSpan := trace2.SpanFromContext(context.Background())
 			trace.On("TraceStart", context.TODO(), apmService).Return(context.TODO(), mockSpan)
-			cognito.On("ConfirmSignUp", tt.in.ctx, tt.in.req).Return(tt.out.res, tt.out.err)
+			cognito.On("ConfirmSignUp", tt.in.ctx, tt.in.req).Return(tt.out.errCognitoSignUp)
+			cognito.On("UsersInitiateAuth", tt.in.ctx, tt.in.req).
+				Return(tt.out.cognitoInitAuthResMock, tt.out.errCognitoSignIn)
 
-			err := svc.UsersConfirmSignUp(ctx, tt.in.req)
-			assert.Equal(t, err, tt.out.err)
+			got, err := svc.UsersConfirmSignUp(ctx, tt.in.req)
+			// Manejo de errores esperado vs real
+			if err != nil {
+				if err.Error() != tt.out.svcErr.Error() {
+					t.Fatalf("❌ Error diferente:\n🟢 Esperado: %v\n🔴 Obtenido: %v", tt.out.errCognitoSignUp, err)
+				}
+			} else if tt.out.errCognitoSignUp != nil {
+				t.Fatalf("❌ Se esperaba un error pero no ocurrió: %v", tt.out.errCognitoSignUp)
+			}
+
+			// Comparación de estructuras con mejor formato
+			if diff := cmp.Diff(tt.out.res, got); diff != "" {
+				t.Errorf("❌ Diferencia en ConfirmSignUp():\n%s", diff)
+
+				// Imprimir estructuras de manera más clara
+				t.Logf("🟢 Esperado:\n%s", spew.Sdump(tt.out.res))
+				t.Logf("🔴 Obtenido:\n%s", spew.Sdump(got))
+			}
 		})
 	}
 }

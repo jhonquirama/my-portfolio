@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/jhonquirama/my-portfolio/internal/users/business/model"
 	ioModel "github.com/jhonquirama/my-portfolio/internal/users/infrastructure/input/handler/http/iomodel"
 	customError "github.com/jhonquirama/my-portfolio/pkg/error"
 	"github.com/jhonquirama/my-portfolio/pkg/mocks/services"
@@ -36,6 +37,7 @@ func TestNewUsersHandler_UsersConfirmSignUp(t *testing.T) {
 			svcUsersConfirmSignUpStatusCode int
 			svcUsersConfirmSignUpErr        error
 			body                            any
+			ServiceResMock                  model.UsersSignInOutput
 		}
 		test struct {
 			testName string
@@ -66,14 +68,16 @@ func TestNewUsersHandler_UsersConfirmSignUp(t *testing.T) {
 				ctx:    mockCtx,
 				reqURL: reqURL,
 				svcUsersConfirmSignUp: ioModel.UsersConfirmSignUpInput{
-					Email: "cccccc@gmail.com",
-					Code:  "123456",
+					Email:  "cccccc@gmail.com",
+					Code:   "123456",
+					Passwd: "mi11224432234#C",
 				},
 			},
 			out: output{
 				svcUsersConfirmSignUpStatusCode: 500,
 				svcUsersConfirmSignUpErr:        customError.New(ctx, customError.UnknownError),
 				body:                            customError.New(ctx, customError.UnknownError),
+				ServiceResMock:                  model.UsersSignInOutput{},
 			},
 		},
 		{
@@ -82,14 +86,18 @@ func TestNewUsersHandler_UsersConfirmSignUp(t *testing.T) {
 				ctx:    mockCtx,
 				reqURL: reqURL,
 				svcUsersConfirmSignUp: ioModel.UsersConfirmSignUpInput{
-					Email: "cccccc@gmail.com",
-					Code:  "123456",
+					Email:  "cccccc@gmail.com",
+					Code:   "123456",
+					Passwd: "mi11224432234#C",
 				},
 			},
 			out: output{
 				svcUsersConfirmSignUpStatusCode: 200,
 				svcUsersConfirmSignUpErr:        nil,
 				body:                            nil,
+				ServiceResMock: model.UsersSignInOutput{
+					Token: "ffgdfgfdgfghgdfdwesrgferghbfc",
+				},
 			},
 		},
 	}
@@ -108,7 +116,7 @@ func TestNewUsersHandler_UsersConfirmSignUp(t *testing.T) {
 
 			svc.On("UsersConfirmSignUp", tt.in.ctx,
 				ioModel.MapUsersConfirmSignUpIOModelToSignUpModel(tt.in.svcUsersConfirmSignUp)).
-				Return(tt.out.svcUsersConfirmSignUpErr)
+				Return(tt.out.ServiceResMock, tt.out.svcUsersConfirmSignUpErr)
 
 			route := gin.Default()
 			route.Use(func(c *gin.Context) {
@@ -200,7 +208,7 @@ func TestUsersHandler_UsersSignUp(t *testing.T) {
 				},
 			},
 			out: output{
-				svcUsersSignUpStatusCode: 400,
+				svcUsersSignUpStatusCode: 500,
 				svcUsersSignUpErr:        customError.New(ctx, customError.RequestBodyValidation),
 				body:                     customError.New(ctx, customError.RequestBodyValidation),
 			},

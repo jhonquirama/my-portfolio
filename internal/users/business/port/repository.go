@@ -15,6 +15,8 @@ type (
 		SignUp(ctx context.Context,
 			data usersModel.UsersSignUpInput) (usersModel.UsersSignUpOutput, error)
 		ConfirmSignUp(ctx context.Context,
-			data usersModel.UsersConfirmSignUpInput) (usersModel.UsersConfirmSignUpOutput, error)
+			data usersModel.UsersConfirmSignUpInputAndSignInInput) error
+		UsersInitiateAuth(ctx context.Context,
+			data usersModel.UsersConfirmSignUpInputAndSignInInput) (usersModel.UsersSignInOutput, error)
 	}
 )

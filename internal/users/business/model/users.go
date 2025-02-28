@@ -22,13 +22,14 @@ type (
 		ResultMetadata      middleware.Metadata
 	}
 
-	UsersConfirmSignUpInput struct {
+	UsersConfirmSignUpInputAndSignInInput struct {
 		UserEmail  string
 		UserCode   string
+		UserPasswd string
 		SecretHash *string
 	}
 
-	UsersConfirmSignUpOutput struct {
-		UserSession string
+	UsersSignInOutput struct {
+		Token string
 	}
 )

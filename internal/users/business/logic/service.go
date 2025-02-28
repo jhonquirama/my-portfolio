@@ -42,14 +42,33 @@ func (svc *usersService) UsersSignUp(ctx context.Context, user usersModel.UsersS
 	return nil
 }
 
-func (svc *usersService) UsersConfirmSignUp(ctx context.Context, user usersModel.UsersConfirmSignUpInput) error {
+func (svc *usersService) UsersConfirmSignUp(ctx context.Context,
+	user usersModel.UsersConfirmSignUpInputAndSignInInput) (usersModel.UsersSignInOutput, error) {
 	ctx, span := svc.apm.TraceStart(ctx, apmService)
 	defer span.End()
 
-	_, err := svc.cognitoAuth.ConfirmSignUp(ctx, user)
+	err := svc.cognitoAuth.ConfirmSignUp(ctx, user)
 	if err != nil {
-		return err
+		return usersModel.UsersSignInOutput{}, err
 	}
 
-	return nil
+	token, err := svc.UsersInitiateAuth(ctx, user)
+	if err != nil {
+		return usersModel.UsersSignInOutput{}, err
+	}
+
+	return token, nil
+}
+
+func (svc *usersService) UsersInitiateAuth(ctx context.Context,
+	user usersModel.UsersConfirmSignUpInputAndSignInInput) (usersModel.UsersSignInOutput, error) {
+	ctx, span := svc.apm.TraceStart(ctx, apmService)
+	defer span.End()
+
+	accessInfo, err := svc.cognitoAuth.UsersInitiateAuth(ctx, user)
+	if err != nil {
+		return usersModel.UsersSignInOutput{}, err
+	}
+
+	return accessInfo, nil
 }

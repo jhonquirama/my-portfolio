@@ -40,6 +40,32 @@ func (_m *Cognito) ConfirmSignUp(ctx context.Context, input model.ConfirmSignUpI
 	return r0, r1
 }
 
+// SignIn provides a mock function with given fields: ctx, input
+func (_m *Cognito) SignIn(ctx context.Context, input model.InitiateAuthInput) (model.InitiateAuthOutput, error) {
+	ret := _m.Called(ctx, input)
+
+	var r0 model.InitiateAuthOutput
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, model.InitiateAuthInput) (model.InitiateAuthOutput, error)); ok {
+		return rf(ctx, input)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, model.InitiateAuthInput) model.InitiateAuthOutput); ok {
+		r0 = rf(ctx, input)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(model.InitiateAuthOutput)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, model.InitiateAuthInput) error); ok {
+		r1 = rf(ctx, input)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // SignUp provides a mock function with given fields: ctx, input
 func (_m *Cognito) SignUp(ctx context.Context, input model.SignUpInput) (model.SignUpOutput, error) {
 	ret := _m.Called(ctx, input)

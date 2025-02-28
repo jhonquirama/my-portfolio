@@ -68,11 +68,12 @@ func (h *UsersHandler) UsersConfirmSignUp(c *gin.Context) {
 		return
 	}
 
-	err := h.service.UsersConfirmSignUp(ctx, ioModel.MapUsersConfirmSignUpIOModelToSignUpModel(userConfirmSignUpReq))
+	response, err := h.service.UsersConfirmSignUp(ctx,
+		ioModel.MapUsersConfirmSignUpIOModelToSignUpModel(userConfirmSignUpReq))
 	if err != nil {
 		c.Errors = append(c.Errors, c.Error(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, ioModel.MapUsersSignInModelToSignInIOModel(response))
 }

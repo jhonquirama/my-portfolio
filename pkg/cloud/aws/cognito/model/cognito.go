@@ -10,4 +10,7 @@ type (
 
 	ConfirmSignUpInput  *cognitoIdentity.ConfirmSignUpInput
 	ConfirmSignUpOutput *cognitoIdentity.ConfirmSignUpOutput
+
+	InitiateAuthInput  *cognitoIdentity.InitiateAuthInput
+	InitiateAuthOutput *cognitoIdentity.InitiateAuthOutput
 )

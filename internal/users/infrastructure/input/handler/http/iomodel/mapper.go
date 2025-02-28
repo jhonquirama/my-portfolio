@@ -11,9 +11,17 @@ func MapUsersSignUpIOModelToSignUpModel(info UsersSignUpInput) usersModel.UsersS
 	}
 }
 
-func MapUsersConfirmSignUpIOModelToSignUpModel(info UsersConfirmSignUpInput) usersModel.UsersConfirmSignUpInput {
-	return usersModel.UsersConfirmSignUpInput{
-		UserEmail: info.Email,
-		UserCode:  info.Code,
+func MapUsersConfirmSignUpIOModelToSignUpModel(info UsersConfirmSignUpInput,
+) usersModel.UsersConfirmSignUpInputAndSignInInput {
+	return usersModel.UsersConfirmSignUpInputAndSignInInput{
+		UserEmail:  info.Email,
+		UserCode:   info.Code,
+		UserPasswd: info.Passwd,
+	}
+}
+
+func MapUsersSignInModelToSignInIOModel(info usersModel.UsersSignInOutput) UsersSignInOutput {
+	return UsersSignInOutput{
+		Token: info.Token,
 	}
 }

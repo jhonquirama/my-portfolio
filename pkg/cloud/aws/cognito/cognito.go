@@ -13,6 +13,8 @@ type (
 	Cognito interface {
 		SignUp(ctx context.Context, input cognitoModel.SignUpInput) (cognitoModel.SignUpOutput, error)
 		ConfirmSignUp(ctx context.Context, input cognitoModel.ConfirmSignUpInput) (cognitoModel.ConfirmSignUpOutput, error)
+		SignIn(ctx context.Context, input cognitoModel.InitiateAuthInput,
+		) (cognitoModel.InitiateAuthOutput, error)
 	}
 	cognito struct {
 		cognitoClient *cognitoClient.Client
@@ -37,4 +39,9 @@ func (c *cognito) SignUp(ctx context.Context, input cognitoModel.SignUpInput) (c
 func (c *cognito) ConfirmSignUp(ctx context.Context, input cognitoModel.ConfirmSignUpInput,
 ) (cognitoModel.ConfirmSignUpOutput, error) {
 	return c.cognitoClient.ConfirmSignUp(ctx, input)
+}
+
+func (c *cognito) SignIn(ctx context.Context, input cognitoModel.InitiateAuthInput,
+) (cognitoModel.InitiateAuthOutput, error) {
+	return c.cognitoClient.InitiateAuth(ctx, input)
 }

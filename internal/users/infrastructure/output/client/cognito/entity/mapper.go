@@ -39,7 +39,7 @@ func SignUpCognitoToSvc(data *cognitoIdentity.SignUpOutput) usersModel.UsersSign
 	}
 }
 
-func ConfirmSignUpSvcToCognito(data usersModel.UsersConfirmSignUpInput,
+func ConfirmSignUpSvcToCognito(data usersModel.UsersConfirmSignUpInputAndSignInInput,
 	clientID string) *cognitoIdentity.ConfirmSignUpInput {
 	return &cognitoIdentity.ConfirmSignUpInput{
 		ClientId:         aws.String(clientID),
@@ -49,12 +49,25 @@ func ConfirmSignUpSvcToCognito(data usersModel.UsersConfirmSignUpInput,
 	}
 }
 
-func ConfirmSignUpCognitoToSvc(data *cognitoIdentity.ConfirmSignUpOutput) usersModel.UsersConfirmSignUpOutput {
-	session := ""
-	if data.Session != nil {
-		session = *data.Session
+func InitiateAuthSvcToCognito(user usersModel.UsersConfirmSignUpInputAndSignInInput,
+	clientID string) *cognitoIdentity.InitiateAuthInput {
+	return &cognitoIdentity.InitiateAuthInput{
+		AuthFlow: "USER_PASSWORD_AUTH",
+		ClientId: aws.String(clientID),
+		AuthParameters: map[string]string{
+			"USERNAME":    user.UserEmail,
+			"PASSWORD":    user.UserPasswd,
+			"SECRET_HASH": *user.SecretHash,
+		},
 	}
-	return usersModel.UsersConfirmSignUpOutput{
-		UserSession: session,
+}
+
+func InitiateAuthCognitoResToSvc(data *cognitoIdentity.InitiateAuthOutput) usersModel.UsersSignInOutput {
+	session := ""
+	if data.AuthenticationResult.AccessToken != nil {
+		session = *data.AuthenticationResult.AccessToken
+	}
+	return usersModel.UsersSignInOutput{
+		Token: session,
 	}
 }

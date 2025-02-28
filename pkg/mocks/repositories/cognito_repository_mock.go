@@ -15,27 +15,17 @@ type CognitoClientAuthRepository struct {
 }
 
 // ConfirmSignUp provides a mock function with given fields: ctx, data
-func (_m *CognitoClientAuthRepository) ConfirmSignUp(ctx context.Context, data model.UsersConfirmSignUpInput) (model.UsersConfirmSignUpOutput, error) {
+func (_m *CognitoClientAuthRepository) ConfirmSignUp(ctx context.Context, data model.UsersConfirmSignUpInputAndSignInInput) error {
 	ret := _m.Called(ctx, data)
 
-	var r0 model.UsersConfirmSignUpOutput
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, model.UsersConfirmSignUpInput) (model.UsersConfirmSignUpOutput, error)); ok {
-		return rf(ctx, data)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, model.UsersConfirmSignUpInput) model.UsersConfirmSignUpOutput); ok {
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, model.UsersConfirmSignUpInputAndSignInInput) error); ok {
 		r0 = rf(ctx, data)
 	} else {
-		r0 = ret.Get(0).(model.UsersConfirmSignUpOutput)
+		r0 = ret.Error(0)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, model.UsersConfirmSignUpInput) error); ok {
-		r1 = rf(ctx, data)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
+	return r0
 }
 
 // SignUp provides a mock function with given fields: ctx, data
@@ -54,6 +44,30 @@ func (_m *CognitoClientAuthRepository) SignUp(ctx context.Context, data model.Us
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, model.UsersSignUpInput) error); ok {
+		r1 = rf(ctx, data)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UsersInitiateAuth provides a mock function with given fields: ctx, data
+func (_m *CognitoClientAuthRepository) UsersInitiateAuth(ctx context.Context, data model.UsersConfirmSignUpInputAndSignInInput) (model.UsersSignInOutput, error) {
+	ret := _m.Called(ctx, data)
+
+	var r0 model.UsersSignInOutput
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, model.UsersConfirmSignUpInputAndSignInInput) (model.UsersSignInOutput, error)); ok {
+		return rf(ctx, data)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, model.UsersConfirmSignUpInputAndSignInInput) model.UsersSignInOutput); ok {
+		r0 = rf(ctx, data)
+	} else {
+		r0 = ret.Get(0).(model.UsersSignInOutput)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, model.UsersConfirmSignUpInputAndSignInInput) error); ok {
 		r1 = rf(ctx, data)
 	} else {
 		r1 = ret.Error(1)

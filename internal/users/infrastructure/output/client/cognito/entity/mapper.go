@@ -20,11 +20,21 @@ func SignUpSvcToCognito(data usersModel.UsersSignUpInput, clientID string) *cogn
 }
 
 func SignUpCognitoToSvc(data *cognitoIdentity.SignUpOutput) usersModel.UsersSignUpOutput {
+	sub := ""
+	if data.Session != nil {
+		sub = *data.UserSub
+	}
+
+	session := ""
+	if data.Session != nil {
+		session = *data.Session
+	}
+
 	return usersModel.UsersSignUpOutput{
 		UserConfirmed:       data.UserConfirmed,
-		UserSub:             *data.UserSub,
+		UserSub:             sub,
 		CodeDeliveryDetails: data.CodeDeliveryDetails,
-		Session:             *data.Session,
+		Session:             session,
 		ResultMetadata:      data.ResultMetadata,
 	}
 }
@@ -40,7 +50,11 @@ func ConfirmSignUpSvcToCognito(data usersModel.UsersConfirmSignUpInput,
 }
 
 func ConfirmSignUpCognitoToSvc(data *cognitoIdentity.ConfirmSignUpOutput) usersModel.UsersConfirmSignUpOutput {
+	session := ""
+	if data.Session != nil {
+		session = *data.Session
+	}
 	return usersModel.UsersConfirmSignUpOutput{
-		UserSession: *data.Session,
+		UserSession: session,
 	}
 }

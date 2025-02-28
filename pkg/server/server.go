@@ -5,7 +5,6 @@ import (
 	"github.com/jhonquirama/my-portfolio/pkg/config"
 	"github.com/jhonquirama/my-portfolio/pkg/container"
 	customLogger "github.com/jhonquirama/my-portfolio/pkg/log"
-	"github.com/jhonquirama/my-portfolio/pkg/monitor/observability"
 	"github.com/jhonquirama/my-portfolio/pkg/server/gin"
 	lambda "github.com/jhonquirama/my-portfolio/pkg/server/gin-lambda"
 )
@@ -29,14 +28,9 @@ func NewServer(ctx context.Context) (*Server, error) {
 		return nil, err
 	}
 
-	tracer, err := observability.NewProvider(ctx, cnf.ApmConfig())
-	if err != nil {
-		return nil, err
-	}
-
 	customLogger.SetEnvironment(cnf.ApmConfig().ApmEnvironment())
 
-	ginServer := gin.NewGinServer(tracer, cnt)
+	ginServer := gin.NewGinServer(cnt.Tracer(), cnt)
 
 	return &Server{
 		GinServer: ginServer,

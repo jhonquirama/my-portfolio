@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	apm "github.com/jhonquirama/my-portfolio/pkg/monitor/observability"
+	apm "github.com/jhonquirama/my-portfolio/pkg/monitor/observability/gotel"
 	"google.golang.org/grpc/codes"
 )
 

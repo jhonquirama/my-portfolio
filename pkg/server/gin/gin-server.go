@@ -4,21 +4,23 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/jhonquirama/my-portfolio/pkg/container"
-	"github.com/jhonquirama/my-portfolio/pkg/monitor/observability"
+	"github.com/jhonquirama/my-portfolio/pkg/monitor/observability/gotel"
+	"go.opentelemetry.io/otel/sdk/trace"
 )
 
 type (
 	Server struct {
 		Engine    *gin.Engine
-		Apm       *observability.Provider
+		Tracer    *trace.TracerProvider
+		Apm       gotel.TelemetryProvider
 		Container container.Container
 	}
 )
 
-func NewGinServer(tracer *observability.Provider, container container.Container) *Server {
+func NewGinServer(tracer gotel.TelemetryProvider, container container.Container) *Server {
 	server := &Server{
 		Engine:    gin.Default(),
-		Apm:       tracer,
+		Tracer:    tracer.GetProvider(),
 		Container: container,
 	}
 
@@ -30,17 +32,11 @@ func NewGinServer(tracer *observability.Provider, container container.Container)
 }
 
 func (s *Server) Run(address string) error {
-	// register tracing provider as a global provider
-	stopTracingProvider, err := s.Apm.RegisterAsGlobal()
-	if err != nil {
-		return err
-	}
-
-	defer func() {
-		if err = stopTracingProvider(context.Background()); err != nil {
+	defer func(Tracer *trace.TracerProvider, ctx context.Context) {
+		err := Tracer.Shutdown(ctx)
+		if err != nil {
 			return
 		}
-	}()
-
+	}(s.Tracer, context.Background())
 	return s.Engine.Run(address)
 }

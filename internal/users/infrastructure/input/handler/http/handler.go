@@ -30,10 +30,8 @@ func NewUsersHandler(service UsersPort.UsersService) *UsersHandler {
 //
 // 400: ErrorResponse
 func (h *UsersHandler) UsersSignUp(c *gin.Context) {
-	var (
-		ctx           = c.Request.Context()
-		userSignUpReq ioModel.UsersSignUpInput
-	)
+	ctx := c.Request.Context()
+	var userSignUpReq ioModel.UsersSignUpInput
 
 	if err := c.BindJSON(&userSignUpReq); err != nil {
 		c.Errors = append(c.Errors,
@@ -60,10 +58,9 @@ func (h *UsersHandler) UsersSignUp(c *gin.Context) {
 //
 // 400: ErrorResponse
 func (h *UsersHandler) UsersConfirmSignUp(c *gin.Context) {
-	var (
-		ctx                  = c.Request.Context()
-		userConfirmSignUpReq ioModel.UsersConfirmSignUpInput
-	)
+	ctx := c.Request.Context()
+
+	var userConfirmSignUpReq ioModel.UsersConfirmSignUpInput
 
 	if err := c.BindJSON(&userConfirmSignUpReq); err != nil {
 		c.Errors = append(c.Errors,

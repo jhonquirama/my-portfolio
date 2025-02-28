@@ -13,6 +13,7 @@ import (
 	"github.com/jhonquirama/my-portfolio/pkg/cloud/aws/cognito"
 	"github.com/jhonquirama/my-portfolio/pkg/config"
 	"github.com/jhonquirama/my-portfolio/pkg/data/dynamodb"
+	"github.com/jhonquirama/my-portfolio/pkg/monitor/observability/gotel"
 )
 
 type (
@@ -20,6 +21,11 @@ type (
 		HealthService() healthPort.HealthService
 		PortfolioService() portfolioPort.PortfolioService
 		UsersService() usersPort.UsersService
+		Tracer() gotel.TelemetryProvider
+	}
+
+	tracer struct {
+		tracer gotel.TelemetryProvider
 	}
 	health struct {
 		service healthPort.HealthService
@@ -34,16 +40,22 @@ type (
 		health    health
 		portfolio portfolio
 		users     users
+		tracer    tracer
 	}
 )
 
 func NewContainer(ctx context.Context, cnf config.Config) (Container, error) {
+	telemetry, err := gotel.NewTelemetry(ctx, cnf.ApmConfig())
+	if err != nil {
+		return nil, err
+	}
+
 	cognitoClient, err := cognito.NewCognito(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	cognitoRepository := cognito2.NewCognitoRepository(cognitoClient, cnf.CognitoConfig())
+	cognitoRepository := cognito2.NewCognitoRepository(telemetry, cognitoClient, cnf.CognitoConfig())
 
 	dynamoDB, err := dynamodb.NewDynamoDB(ctx, cnf.DynamodbClientConfig())
 	if err != nil {
@@ -54,12 +66,13 @@ func NewContainer(ctx context.Context, cnf config.Config) (Container, error) {
 
 	healthService := healthLogic.NewHealthService()
 	portfolioService := portfolioLogic.NewPortfolioService()
-	usersService := logic.NewUsersService(dynamodbRepository, cognitoRepository)
+	usersService := logic.NewUsersService(dynamodbRepository, cognitoRepository, telemetry)
 
 	return &container{
 		health:    health{service: healthService},
 		portfolio: portfolio{service: portfolioService},
-		users:     users{service: usersService}}, nil
+		users:     users{service: usersService},
+		tracer:    tracer{tracer: telemetry}}, nil
 }
 
 func (c container) HealthService() healthPort.HealthService {
@@ -70,4 +83,7 @@ func (c container) PortfolioService() portfolioPort.PortfolioService {
 }
 func (c container) UsersService() usersPort.UsersService {
 	return c.users.service
+}
+func (c container) Tracer() gotel.TelemetryProvider {
+	return c.tracer.tracer
 }

@@ -5,8 +5,10 @@ import (
 	"errors"
 	"github.com/jhonquirama/my-portfolio/internal/users/business/model"
 	"github.com/jhonquirama/my-portfolio/pkg/mocks/repositories"
+	mocks2 "github.com/jhonquirama/my-portfolio/pkg/monitor/observability/gotel/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	trace2 "go.opentelemetry.io/otel/trace"
 	"testing"
 )
 
@@ -66,8 +68,10 @@ func TestNewUsersService_UsersSignUp(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.testName, func(t *testing.T) {
 			cognito := &mocks.CognitoClientAuthRepository{}
-			svc := NewUsersService(&mocks.DBAuthRepository{}, cognito)
-
+			trace := mocks2.TelemetryProvider{}
+			svc := NewUsersService(&mocks.DBAuthRepository{}, cognito, &trace)
+			mockSpan := trace2.SpanFromContext(context.Background())
+			trace.On("TraceStart", context.TODO(), apmService).Return(context.TODO(), mockSpan)
 			cognito.On("SignUp", tt.in.ctx, tt.in.req).Return(tt.out.res, tt.out.err)
 
 			err := svc.UsersSignUp(ctx, tt.in.req)
@@ -132,8 +136,10 @@ func TestNewUsersService_UsersConfirmSignUp(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.testName, func(t *testing.T) {
 			cognito := &mocks.CognitoClientAuthRepository{}
-			svc := NewUsersService(&mocks.DBAuthRepository{}, cognito)
-
+			trace := mocks2.NewTelemetryProvider(t)
+			svc := NewUsersService(&mocks.DBAuthRepository{}, cognito, trace)
+			mockSpan := trace2.SpanFromContext(context.Background())
+			trace.On("TraceStart", context.TODO(), apmService).Return(context.TODO(), mockSpan)
 			cognito.On("ConfirmSignUp", tt.in.ctx, tt.in.req).Return(tt.out.res, tt.out.err)
 
 			err := svc.UsersConfirmSignUp(ctx, tt.in.req)

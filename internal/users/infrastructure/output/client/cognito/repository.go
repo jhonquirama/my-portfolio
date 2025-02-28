@@ -6,6 +6,11 @@ import (
 	"encoding/base64"
 	authPort "github.com/jhonquirama/my-portfolio/internal/users/business/port"
 	cognito "github.com/jhonquirama/my-portfolio/pkg/cloud/aws/cognito"
+	"github.com/jhonquirama/my-portfolio/pkg/monitor/observability/gotel"
+)
+
+const (
+	apmCognito = "cognito"
 )
 
 type (
@@ -20,11 +25,14 @@ type (
 		appClientID     string
 		appClientSecret string
 		cognito         cognito.Cognito
+		apm             gotel.TelemetryProvider
 	}
 )
 
-func NewCognitoRepository(cognito cognito.Cognito, cf Config) authPort.CognitoClientAuthRepository {
+func NewCognitoRepository(apm gotel.TelemetryProvider,
+	cognito cognito.Cognito, cf Config) authPort.CognitoClientAuthRepository {
 	return &cognitoRepository{
+		apm:             apm,
 		poolID:          cf.PoolID(),
 		appClientID:     cf.AppClientID(),
 		appClientSecret: cf.AppClientSecret(),

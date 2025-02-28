@@ -7,12 +7,11 @@ import (
 	usersModel "github.com/jhonquirama/my-portfolio/internal/users/business/model"
 	cognitoEntity "github.com/jhonquirama/my-portfolio/internal/users/infrastructure/output/client/cognito/entity"
 	customError "github.com/jhonquirama/my-portfolio/pkg/error"
-	"github.com/jhonquirama/my-portfolio/pkg/monitor/observability"
 )
 
 func (c *cognitoRepository) SignUp(ctx context.Context,
 	data usersModel.UsersSignUpInput) (usersModel.UsersSignUpOutput, error) {
-	ctx, span := observability.NewSpan(ctx, observability.Client)
+	ctx, span := c.apm.TraceStart(ctx, apmCognito)
 	defer span.End()
 
 	data.SecretHash = c.getSecretHash(data.UserEmail)
@@ -32,7 +31,7 @@ func (c *cognitoRepository) SignUp(ctx context.Context,
 
 func (c *cognitoRepository) ConfirmSignUp(ctx context.Context, data usersModel.UsersConfirmSignUpInput,
 ) (usersModel.UsersConfirmSignUpOutput, error) {
-	ctx, span := observability.NewSpan(ctx, observability.Client)
+	ctx, span := c.apm.TraceStart(ctx, apmCognito)
 	defer span.End()
 
 	data.SecretHash = c.getSecretHash(data.UserEmail)

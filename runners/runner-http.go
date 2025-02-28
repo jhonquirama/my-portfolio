@@ -13,10 +13,10 @@ type httpRunner struct {
 func (runner *httpRunner) Run(ctx context.Context) error {
 	customLogger.Info(ctx, "Running as a HTTP Server ... ")
 
-	server, err := server.NewServer(ctx)
+	newServer, err := server.NewServer(ctx)
 	if err != nil {
 		return err
 	}
 
-	return server.GinServer.Run(server.Config.ServerHTTPAddress())
+	return newServer.GinServer.Run(newServer.Config.ServerHTTPAddress())
 }

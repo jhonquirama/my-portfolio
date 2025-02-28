@@ -7,7 +7,7 @@ import (
 )
 
 func (s *Server) middlewareConfig() {
-	s.Engine.Use(otelgin.Middleware("App", otelgin.WithTracerProvider(s.Apm.Provider)))
+	s.Engine.Use(otelgin.Middleware("App", otelgin.WithTracerProvider(s.Tracer)))
 
 	s.Engine.Use(gin.Recovery())
 

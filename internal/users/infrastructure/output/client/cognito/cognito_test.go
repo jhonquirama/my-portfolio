@@ -171,7 +171,7 @@ func Test_cognitoRepository_SignUp(t *testing.T) {
 		}
 		input struct {
 			ctx  context.Context
-			data model.UsersSignUpInput
+			data model.UsersSignUpAndSignInInput
 		}
 		output struct {
 			want             model.UsersSignUpOutput
@@ -190,7 +190,7 @@ func Test_cognitoRepository_SignUp(t *testing.T) {
 			name: "Case error otp not valid",
 			in: input{
 				ctx: ctx,
-				data: model.UsersSignUpInput{
+				data: model.UsersSignUpAndSignInInput{
 					UserEmail:    "test",
 					UserPassword: "122333",
 				},
@@ -211,7 +211,7 @@ func Test_cognitoRepository_SignUp(t *testing.T) {
 			name: "Case error user Exist",
 			in: input{
 				ctx: ctx,
-				data: model.UsersSignUpInput{
+				data: model.UsersSignUpAndSignInInput{
 					UserEmail:    "test",
 					UserPassword: "122333",
 				},
@@ -234,7 +234,7 @@ func Test_cognitoRepository_SignUp(t *testing.T) {
 			name: "Case Success",
 			in: input{
 				ctx: ctx,
-				data: model.UsersSignUpInput{
+				data: model.UsersSignUpAndSignInInput{
 					UserEmail:    "test",
 					UserPassword: "122333",
 				},
@@ -247,7 +247,36 @@ func Test_cognitoRepository_SignUp(t *testing.T) {
 			on: func(dep *depFields, in input, out output) {
 				mockSpan := trace2.SpanFromContext(context.Background())
 				dep.trace.On("TraceStart", mock.Anything, apmCognito).Return(context.TODO(), mockSpan)
-				mockOutput := model2.SignUpOutput(&cognitoidentityprovider.SignUpOutput{}) // 🔥 Conversión explícita
+				mockOutput := model2.SignUpOutput(&cognitoidentityprovider.SignUpOutput{})
+
+				dep.cognito.On("SignUp", mock.Anything, mock.Anything).
+					Return(mockOutput, out.wantErr)
+			},
+		},
+		{
+			name: "Case Success two",
+			in: input{
+				ctx: ctx,
+				data: model.UsersSignUpAndSignInInput{
+					UserEmail:    "test",
+					UserPassword: "122333",
+				},
+			},
+			out: output{
+				want: model.UsersSignUpOutput{
+					UserSub: "sdfsdfsdfsdfsdfsd",
+					Session: "sdfsdfsdfsdfsdfsd",
+				},
+				wantErr:     nil,
+				mockCognito: nil,
+			},
+			on: func(dep *depFields, in input, out output) {
+				mockSpan := trace2.SpanFromContext(context.Background())
+				dep.trace.On("TraceStart", mock.Anything, apmCognito).Return(context.TODO(), mockSpan)
+				mockOutput := model2.SignUpOutput(&cognitoidentityprovider.SignUpOutput{
+					UserSub: aws.String("sdfsdfsdfsdfsdfsd"),
+					Session: aws.String("sdfsdfsdfsdfsdfsd"),
+				})
 
 				dep.cognito.On("SignUp", mock.Anything, mock.Anything).
 					Return(mockOutput, out.wantErr)
@@ -305,7 +334,7 @@ func Test_cognitoRepository_UsersInitiateAuth(t *testing.T) {
 		}
 		input struct {
 			ctx  context.Context
-			data model.UsersConfirmSignUpInputAndSignInInput
+			data model.UsersSignUpAndSignInInput
 		}
 		output struct {
 			want        model.UsersSignInOutput
@@ -323,9 +352,9 @@ func Test_cognitoRepository_UsersInitiateAuth(t *testing.T) {
 			name: "Case error otp not valid",
 			in: input{
 				ctx: ctx,
-				data: model.UsersConfirmSignUpInputAndSignInInput{
-					UserEmail: "test",
-					UserCode:  "122333",
+				data: model.UsersSignUpAndSignInInput{
+					UserEmail:    "test",
+					UserPassword: "122333",
 				},
 			},
 			out: output{
@@ -344,14 +373,13 @@ func Test_cognitoRepository_UsersInitiateAuth(t *testing.T) {
 			name: "Case Success",
 			in: input{
 				ctx: ctx,
-				data: model.UsersConfirmSignUpInputAndSignInInput{
-					UserEmail:  "test",
-					UserCode:   "122333",
-					UserPasswd: "test",
+				data: model.UsersSignUpAndSignInInput{
+					UserEmail:    "test",
+					UserPassword: "122333",
 				},
 			},
 			out: output{
-				want:        model.UsersSignInOutput{Token: "test"},
+				want:        model.UsersSignInOutput{AccessToken: "test"},
 				wantErr:     nil,
 				mockCognito: nil,
 			},
@@ -360,9 +388,13 @@ func Test_cognitoRepository_UsersInitiateAuth(t *testing.T) {
 				dep.trace.On("TraceStart", mock.Anything, apmCognito).Return(context.TODO(), mockSpan)
 				mockOutput := model2.InitiateAuthOutput(&cognitoidentityprovider.InitiateAuthOutput{
 					AuthenticationResult: &types.AuthenticationResultType{
-						AccessToken: aws.String("test"),
+						AccessToken:  aws.String("test"),
+						ExpiresIn:    32312,
+						IdToken:      aws.String("test"),
+						RefreshToken: aws.String("test"),
+						TokenType:    aws.String("Bearer"),
 					},
-				}) // 🔥 Conversión explícita
+				})
 
 				dep.cognito.On("SignIn", mock.Anything, mock.Anything).
 					Return(mockOutput, out.wantErr)
@@ -397,7 +429,7 @@ func Test_cognitoRepository_UsersInitiateAuth(t *testing.T) {
 				t.Fatalf("❌ Se esperaba un error pero no ocurrió: %v", tt.out.wantErr)
 			}
 
-			if diff := cmp.Diff(tt.out.want.Token, got.Token); diff != "" {
+			if diff := cmp.Diff(tt.out.want.AccessToken, got.AccessToken); diff != "" {
 				t.Errorf("❌ Diferencia en ConfirmSignUp():\n%s", diff)
 
 				// Imprimir estructuras de manera más clara

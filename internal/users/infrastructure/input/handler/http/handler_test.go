@@ -96,7 +96,7 @@ func TestNewUsersHandler_UsersConfirmSignUp(t *testing.T) {
 				svcUsersConfirmSignUpErr:        nil,
 				body:                            nil,
 				ServiceResMock: model.UsersSignInOutput{
-					Token: "ffgdfgfdgfghgdfdwesrgferghbfc",
+					AccessToken: "ffgdfgfdgfghgdfdwesrgferghbfc",
 				},
 			},
 		},
@@ -151,7 +151,7 @@ func TestUsersHandler_UsersSignUp(t *testing.T) {
 		input struct {
 			ctx            string // se usa el context para mock
 			reqURL         string
-			svcUsersSignUp ioModel.UsersSignUpInput
+			svcUsersSignUp ioModel.UsersSignUpAndSingInInput
 		}
 		output struct {
 			svcUsersSignUpStatusCode int
@@ -170,7 +170,7 @@ func TestUsersHandler_UsersSignUp(t *testing.T) {
 			in: input{
 				ctx:    mockCtx,
 				reqURL: reqURL,
-				svcUsersSignUp: ioModel.UsersSignUpInput{
+				svcUsersSignUp: ioModel.UsersSignUpAndSingInInput{
 					Email:    "",
 					Password: "",
 				},
@@ -186,7 +186,7 @@ func TestUsersHandler_UsersSignUp(t *testing.T) {
 			in: input{
 				ctx:    mockCtx,
 				reqURL: reqURL,
-				svcUsersSignUp: ioModel.UsersSignUpInput{
+				svcUsersSignUp: ioModel.UsersSignUpAndSingInInput{
 					Email:    "cccccc@gmail.com",
 					Password: "123456",
 				},
@@ -202,7 +202,7 @@ func TestUsersHandler_UsersSignUp(t *testing.T) {
 			in: input{
 				ctx:    mockCtx,
 				reqURL: reqURL,
-				svcUsersSignUp: ioModel.UsersSignUpInput{
+				svcUsersSignUp: ioModel.UsersSignUpAndSingInInput{
 					Email:    "cccccc@gmail.com",
 					Password: "12345678",
 				},
@@ -218,7 +218,7 @@ func TestUsersHandler_UsersSignUp(t *testing.T) {
 			in: input{
 				ctx:    mockCtx,
 				reqURL: reqURL,
-				svcUsersSignUp: ioModel.UsersSignUpInput{
+				svcUsersSignUp: ioModel.UsersSignUpAndSingInInput{
 					Email:    "cccccc@gmail.com",
 					Password: "12345678",
 				},
@@ -252,6 +252,139 @@ func TestUsersHandler_UsersSignUp(t *testing.T) {
 				ginMiddleware.MiddlewareError(c)
 			})
 			route.POST(routeURL, handler.UsersSignUp)
+			route.ServeHTTP(w, req)
+			statusCode := w.Result().StatusCode
+			bodyStr := w.Body.String()
+
+			assert.Equal(t, tt.out.svcUsersSignUpStatusCode, statusCode)
+
+			if statusCode < http.StatusOK || statusCode >= http.StatusMultipleChoices {
+				outResError := tt.out.body.(error)
+				httpResError := unmarshalResErr(bodyStr)
+
+				assert.Equal(t, customError.Code(outResError), httpResError.Code)
+			}
+		})
+	}
+}
+
+func TestUsersHandler_UsersSignIn(t *testing.T) {
+	var (
+		routeURL = "/my-portfolio/users/sign-in"
+		reqURL   = "/my-portfolio/users/sign-in"
+
+		ctx     = context.TODO()
+		mockCtx = mock.Anything
+	)
+	type (
+		input struct {
+			ctx            string // se usa el context para mock
+			reqURL         string
+			svcUsersSignUp ioModel.UsersSignUpAndSingInInput
+		}
+		output struct {
+			svcUsersSignUpStatusCode int
+			svcUsersSignUpErr        error
+			body                     any
+			serSignInRes             model.UsersSignInOutput
+		}
+		test struct {
+			testName string
+			in       input
+			out      output
+		}
+	)
+	tests := []test{
+		{
+			testName: "BAD REQUEST",
+			in: input{
+				ctx:    mockCtx,
+				reqURL: reqURL,
+				svcUsersSignUp: ioModel.UsersSignUpAndSingInInput{
+					Email:    "",
+					Password: "",
+				},
+			},
+			out: output{
+				svcUsersSignUpStatusCode: 400,
+				svcUsersSignUpErr:        customError.New(ctx, customError.RequestBodyValidation),
+				body:                     customError.New(ctx, customError.RequestBodyValidation),
+			},
+		},
+		{
+			testName: "SIGNUP PASS WRONG",
+			in: input{
+				ctx:    mockCtx,
+				reqURL: reqURL,
+				svcUsersSignUp: ioModel.UsersSignUpAndSingInInput{
+					Email:    "cccccc@gmail.com",
+					Password: "123456",
+				},
+			},
+			out: output{
+				svcUsersSignUpStatusCode: 400,
+				svcUsersSignUpErr:        customError.New(ctx, customError.RequestBodyValidation),
+				body:                     customError.New(ctx, customError.RequestBodyValidation),
+			},
+		},
+		{
+			testName: "SIGNUP PASS GOOD WRONG BY SVC",
+			in: input{
+				ctx:    mockCtx,
+				reqURL: reqURL,
+				svcUsersSignUp: ioModel.UsersSignUpAndSingInInput{
+					Email:    "cccccc@gmail.com",
+					Password: "12345678",
+				},
+			},
+			out: output{
+				svcUsersSignUpStatusCode: 500,
+				svcUsersSignUpErr:        customError.New(ctx, customError.RequestBodyValidation),
+				body:                     customError.New(ctx, customError.RequestBodyValidation),
+			},
+		},
+		{
+			testName: "SIGNUP SUCCESS",
+			in: input{
+				ctx:    mockCtx,
+				reqURL: reqURL,
+				svcUsersSignUp: ioModel.UsersSignUpAndSingInInput{
+					Email:    "cccccc@gmail.com",
+					Password: "12345678",
+				},
+			},
+			out: output{
+				svcUsersSignUpStatusCode: 200,
+				svcUsersSignUpErr:        nil,
+				body:                     nil,
+				serSignInRes: model.UsersSignInOutput{
+					AccessToken: "trtghgbfsdfgjnc",
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.testName, func(t *testing.T) {
+			w := httptest.NewRecorder()
+
+			requestContent, _ := json.Marshal(tt.in.svcUsersSignUp)
+			req, err := http.NewRequest(http.MethodPost, tt.in.reqURL, bytes.NewReader(requestContent))
+			if err != nil {
+				require.NoError(t, err)
+			}
+
+			svc := &mocks.UsersService{}
+			handler := NewUsersHandler(svc)
+
+			svc.On("UsersInitiateAuth", tt.in.ctx,
+				ioModel.MapUsersSignUpIOModelToSignUpModel(tt.in.svcUsersSignUp)).
+				Return(tt.out.serSignInRes, tt.out.svcUsersSignUpErr)
+
+			route := gin.Default()
+			route.Use(func(c *gin.Context) {
+				ginMiddleware.MiddlewareError(c)
+			})
+			route.POST(routeURL, handler.UsersSignIn)
 			route.ServeHTTP(w, req)
 			statusCode := w.Result().StatusCode
 			bodyStr := w.Body.String()

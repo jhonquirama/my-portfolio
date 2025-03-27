@@ -6,7 +6,7 @@ import (
 )
 
 type (
-	UsersSignUpInput struct {
+	UsersSignUpAndSignInInput struct {
 		UserName       string
 		UserEmail      string
 		UserPassword   string
@@ -30,6 +30,9 @@ type (
 	}
 
 	UsersSignInOutput struct {
-		Token string
+		AccessToken      string
+		RefreshToken     string
+		TokenID          string
+		ExpiresInSeconds int32
 	}
 )

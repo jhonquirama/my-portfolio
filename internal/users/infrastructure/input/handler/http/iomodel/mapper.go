@@ -4,8 +4,8 @@ import (
 	usersModel "github.com/jhonquirama/my-portfolio/internal/users/business/model"
 )
 
-func MapUsersSignUpIOModelToSignUpModel(info UsersSignUpInput) usersModel.UsersSignUpInput {
-	return usersModel.UsersSignUpInput{
+func MapUsersSignUpIOModelToSignUpModel(info UsersSignUpAndSingInInput) usersModel.UsersSignUpAndSignInInput {
+	return usersModel.UsersSignUpAndSignInInput{
 		UserEmail:    info.Email,
 		UserPassword: info.Password,
 	}
@@ -22,6 +22,9 @@ func MapUsersConfirmSignUpIOModelToSignUpModel(info UsersConfirmSignUpInput,
 
 func MapUsersSignInModelToSignInIOModel(info usersModel.UsersSignInOutput) UsersSignInOutput {
 	return UsersSignInOutput{
-		Token: info.Token,
+		AccessToken:      info.AccessToken,
+		RefreshToken:     info.RefreshToken,
+		TokenID:          info.TokenID,
+		ExpiresInSeconds: info.ExpiresInSeconds,
 	}
 }

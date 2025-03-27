@@ -39,21 +39,21 @@ func (_m *UsersService) UsersConfirmSignUp(ctx context.Context, data model.Users
 }
 
 // UsersInitiateAuth provides a mock function with given fields: ctx, user
-func (_m *UsersService) UsersInitiateAuth(ctx context.Context, user model.UsersConfirmSignUpInputAndSignInInput) (model.UsersSignInOutput, error) {
+func (_m *UsersService) UsersInitiateAuth(ctx context.Context, user model.UsersSignUpAndSignInInput) (model.UsersSignInOutput, error) {
 	ret := _m.Called(ctx, user)
 
 	var r0 model.UsersSignInOutput
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, model.UsersConfirmSignUpInputAndSignInInput) (model.UsersSignInOutput, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, model.UsersSignUpAndSignInInput) (model.UsersSignInOutput, error)); ok {
 		return rf(ctx, user)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, model.UsersConfirmSignUpInputAndSignInInput) model.UsersSignInOutput); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, model.UsersSignUpAndSignInInput) model.UsersSignInOutput); ok {
 		r0 = rf(ctx, user)
 	} else {
 		r0 = ret.Get(0).(model.UsersSignInOutput)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, model.UsersConfirmSignUpInputAndSignInInput) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, model.UsersSignUpAndSignInInput) error); ok {
 		r1 = rf(ctx, user)
 	} else {
 		r1 = ret.Error(1)
@@ -63,11 +63,11 @@ func (_m *UsersService) UsersInitiateAuth(ctx context.Context, user model.UsersC
 }
 
 // UsersSignUp provides a mock function with given fields: ctx, data
-func (_m *UsersService) UsersSignUp(ctx context.Context, data model.UsersSignUpInput) error {
+func (_m *UsersService) UsersSignUp(ctx context.Context, data model.UsersSignUpAndSignInInput) error {
 	ret := _m.Called(ctx, data)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, model.UsersSignUpInput) error); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, model.UsersSignUpAndSignInInput) error); ok {
 		r0 = rf(ctx, data)
 	} else {
 		r0 = ret.Error(0)

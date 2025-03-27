@@ -8,7 +8,7 @@ import (
 )
 
 func (c *cognitoRepository) SignUp(ctx context.Context,
-	data usersModel.UsersSignUpInput) (usersModel.UsersSignUpOutput, error) {
+	data usersModel.UsersSignUpAndSignInInput) (usersModel.UsersSignUpOutput, error) {
 	ctx, span := c.apm.TraceStart(ctx, apmCognito)
 	defer span.End()
 
@@ -40,7 +40,7 @@ func (c *cognitoRepository) ConfirmSignUp(ctx context.Context, data usersModel.U
 }
 
 func (c *cognitoRepository) UsersInitiateAuth(ctx context.Context,
-	data usersModel.UsersConfirmSignUpInputAndSignInInput) (usersModel.UsersSignInOutput, error) {
+	data usersModel.UsersSignUpAndSignInInput) (usersModel.UsersSignInOutput, error) {
 	ctx, span := c.apm.TraceStart(ctx, apmCognito)
 	defer span.End()
 

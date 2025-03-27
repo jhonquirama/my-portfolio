@@ -7,7 +7,7 @@ import (
 	usersModel "github.com/jhonquirama/my-portfolio/internal/users/business/model"
 )
 
-func SignUpSvcToCognito(data usersModel.UsersSignUpInput, clientID string) *cognitoIdentity.SignUpInput {
+func SignUpSvcToCognito(data usersModel.UsersSignUpAndSignInInput, clientID string) *cognitoIdentity.SignUpInput {
 	return &cognitoIdentity.SignUpInput{
 		ClientId:   aws.String(clientID),
 		Username:   aws.String(data.UserEmail),
@@ -21,7 +21,7 @@ func SignUpSvcToCognito(data usersModel.UsersSignUpInput, clientID string) *cogn
 
 func SignUpCognitoToSvc(data *cognitoIdentity.SignUpOutput) usersModel.UsersSignUpOutput {
 	sub := ""
-	if data.Session != nil {
+	if data.UserSub != nil {
 		sub = *data.UserSub
 	}
 
@@ -49,25 +49,24 @@ func ConfirmSignUpSvcToCognito(data usersModel.UsersConfirmSignUpInputAndSignInI
 	}
 }
 
-func InitiateAuthSvcToCognito(user usersModel.UsersConfirmSignUpInputAndSignInInput,
+func InitiateAuthSvcToCognito(user usersModel.UsersSignUpAndSignInInput,
 	clientID string) *cognitoIdentity.InitiateAuthInput {
 	return &cognitoIdentity.InitiateAuthInput{
 		AuthFlow: "USER_PASSWORD_AUTH",
 		ClientId: aws.String(clientID),
 		AuthParameters: map[string]string{
 			"USERNAME":    user.UserEmail,
-			"PASSWORD":    user.UserPasswd,
+			"PASSWORD":    user.UserPassword,
 			"SECRET_HASH": *user.SecretHash,
 		},
 	}
 }
 
 func InitiateAuthCognitoResToSvc(data *cognitoIdentity.InitiateAuthOutput) usersModel.UsersSignInOutput {
-	session := ""
-	if data.AuthenticationResult.AccessToken != nil {
-		session = *data.AuthenticationResult.AccessToken
-	}
 	return usersModel.UsersSignInOutput{
-		Token: session,
+		AccessToken:      *data.AuthenticationResult.AccessToken,
+		RefreshToken:     *data.AuthenticationResult.RefreshToken,
+		TokenID:          *data.AuthenticationResult.IdToken,
+		ExpiresInSeconds: data.AuthenticationResult.ExpiresIn,
 	}
 }

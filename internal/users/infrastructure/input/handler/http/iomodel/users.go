@@ -1,7 +1,7 @@
 package iomodel
 
 type (
-	UsersSignUpInput struct {
+	UsersSignUpAndSingInInput struct {
 		Email    string `json:"email" binding:"required,email"`
 		Password string `json:"password" binding:"required,min=8,max=256"`
 	}
@@ -13,6 +13,9 @@ type (
 	}
 
 	UsersSignInOutput struct {
-		Token string `json:"token"`
+		AccessToken      string `json:"access_token"`
+		RefreshToken     string `json:"refresh_token"`
+		TokenID          string `json:"token_id"`
+		ExpiresInSeconds int32  `json:"expires_in_seconds"`
 	}
 )

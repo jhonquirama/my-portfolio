@@ -31,7 +31,7 @@ func NewUsersHandler(service UsersPort.UsersService) *UsersHandler {
 // 400: ErrorResponse
 func (h *UsersHandler) UsersSignUp(c *gin.Context) {
 	ctx := c.Request.Context()
-	var userSignUpReq ioModel.UsersSignUpInput
+	var userSignUpReq ioModel.UsersSignUpAndSingInInput
 
 	if err := c.BindJSON(&userSignUpReq); err != nil {
 		c.Errors = append(c.Errors,
@@ -70,6 +70,36 @@ func (h *UsersHandler) UsersConfirmSignUp(c *gin.Context) {
 
 	response, err := h.service.UsersConfirmSignUp(ctx,
 		ioModel.MapUsersConfirmSignUpIOModelToSignUpModel(userConfirmSignUpReq))
+	if err != nil {
+		c.Errors = append(c.Errors, c.Error(err))
+		return
+	}
+
+	c.JSON(http.StatusOK, ioModel.MapUsersSignInModelToSignInIOModel(response))
+}
+
+// swagger:route GET /my-portfolio/users/sign-in login users
+//
+// # login user
+//
+// Responses:
+//
+//	200:
+//
+// 400: ErrorResponse
+func (h *UsersHandler) UsersSignIn(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	var userConfirmSignUpReq ioModel.UsersSignUpAndSingInInput
+
+	if err := c.BindJSON(&userConfirmSignUpReq); err != nil {
+		c.Errors = append(c.Errors,
+			c.Error(CustomCode.New(ctx, CustomCode.RequestBodyValidation, CustomCode.WithMessage(err.Error()))))
+		return
+	}
+
+	response, err := h.service.UsersInitiateAuth(ctx,
+		ioModel.MapUsersSignUpIOModelToSignUpModel(userConfirmSignUpReq))
 	if err != nil {
 		c.Errors = append(c.Errors, c.Error(err))
 		return

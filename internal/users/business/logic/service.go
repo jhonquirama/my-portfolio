@@ -30,7 +30,7 @@ func NewUsersService(dbAuthRepository usersPort.DBAuthRepository,
 	}
 }
 
-func (svc *usersService) UsersSignUp(ctx context.Context, user usersModel.UsersSignUpInput) error {
+func (svc *usersService) UsersSignUp(ctx context.Context, user usersModel.UsersSignUpAndSignInInput) error {
 	ctx, span := svc.apm.TraceStart(ctx, apmService)
 	defer span.End()
 
@@ -52,7 +52,7 @@ func (svc *usersService) UsersConfirmSignUp(ctx context.Context,
 		return usersModel.UsersSignInOutput{}, err
 	}
 
-	token, err := svc.UsersInitiateAuth(ctx, user)
+	token, err := svc.UsersInitiateAuth(ctx, usersModel.UsersConfirmSignUpToUsersSignIn(user))
 	if err != nil {
 		return usersModel.UsersSignInOutput{}, err
 	}
@@ -61,7 +61,7 @@ func (svc *usersService) UsersConfirmSignUp(ctx context.Context,
 }
 
 func (svc *usersService) UsersInitiateAuth(ctx context.Context,
-	user usersModel.UsersConfirmSignUpInputAndSignInInput) (usersModel.UsersSignInOutput, error) {
+	user usersModel.UsersSignUpAndSignInInput) (usersModel.UsersSignInOutput, error) {
 	ctx, span := svc.apm.TraceStart(ctx, apmService)
 	defer span.End()
 

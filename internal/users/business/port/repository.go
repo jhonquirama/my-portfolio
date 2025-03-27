@@ -13,10 +13,10 @@ type (
 
 	CognitoClientAuthRepository interface {
 		SignUp(ctx context.Context,
-			data usersModel.UsersSignUpInput) (usersModel.UsersSignUpOutput, error)
+			data usersModel.UsersSignUpAndSignInInput) (usersModel.UsersSignUpOutput, error)
 		ConfirmSignUp(ctx context.Context,
 			data usersModel.UsersConfirmSignUpInputAndSignInInput) error
 		UsersInitiateAuth(ctx context.Context,
-			data usersModel.UsersConfirmSignUpInputAndSignInInput) (usersModel.UsersSignInOutput, error)
+			data usersModel.UsersSignUpAndSignInInput) (usersModel.UsersSignInOutput, error)
 	}
 )

@@ -68,17 +68,25 @@ jobs:
 
       # Construir y subir imagen Docker
       - name: Build and Push Docker image
+        env:
+          ECR_REGISTRY: ${{ secrets.ECR_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
         run: |
-          TAG=${{ github.event.inputs.target-branch || github.ref_name }}  # Usa la rama como tag
+          # Normaliza el tag
+          RAW_TAG=${{ github.event.inputs.target-branch || github.ref_name }}
+          TAG=$(echo "$RAW_TAG" | tr '/' '-')
+          
+          # Build y push
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$TAG
+          
+          # Guarda el tag normalizado para pasos posteriores
+          echo "TAG=$TAG" >> $GITHUB_ENV
 
-      # Actualizar Helm chart en el repo de infraestructura
-      - name: Update Helm Chart in Infra Repo
-        env:
-          TAG: ${{ github.event.inputs.target-branch || github.ref_name }}
+      - name: Update Helm Chart
         run: |
-          # Clonar el repo de infraestructura usando actions/checkout (más seguro)
+          echo "Using tag: ${{ env.TAG }}"  # Accede al tag normalizado
+          # ... (resto del código para actualizar Helm)
           - name: Checkout Infra Repo
             uses: actions/checkout@v4
             with:

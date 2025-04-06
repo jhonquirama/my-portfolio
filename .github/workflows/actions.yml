@@ -68,44 +68,50 @@ jobs:
 
       # Construir y subir imagen Docker
       - name: Build and Push Docker image
+        id: docker_push
         env:
           ECR_REGISTRY: ${{ secrets.ECR_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
           ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
         run: |
-          # Normaliza el tag
+          # Normalizar el tag
           RAW_TAG=${{ github.event.inputs.target-branch || github.ref_name }}
-          TAG=$(echo "$RAW_TAG" | tr '/' '-')
-          
-          # Build y push
+          TAG=$(echo "$RAW_TAG" | tr '/' '-' | cut -c 1-30)
+          echo "Normalized tag: $TAG"
+
+          # Construir y subir imagen
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$TAG
-          
-          # Guarda el tag normalizado para pasos posteriores
+
+          # Guardar tag para pasos posteriores
           echo "TAG=$TAG" >> $GITHUB_ENV
+          echo "IMAGE=$ECR_REGISTRY/$ECR_REPOSITORY:$TAG" >> $GITHUB_ENV
 
       - name: Update Helm Chart
+        if: success()
+        env:
+          INFRA_REPO: "infra-core"
         run: |
-          echo "Using tag: ${{ env.TAG }}"  # Accede al tag normalizado
-          # ... (resto del código para actualizar Helm)
-          - name: Checkout Infra Repo
-            uses: actions/checkout@v4
-            with:
-              repository: jhonquirama/infra-core
-              token: ${{ secrets.INFRA_REPO_TOKEN }}
-              path: infra-core
+          echo "Using normalized tag: ${{ env.TAG }}"
 
-          # Actualizar el values.yaml
-          echo "image:
-            repository: $ECR_REGISTRY/$ECR_REPOSITORY
-            tag: \"$TAG\"" > infra-core/kubernetes/$APP_NAME/values.yaml
+          # Clonar repo de infraestructura
+          git clone https://${{ secrets.INFRA_REPO_TOKEN }}@github.com/jhonquirama/$INFRA_REPO.git
+          cd $INFRA_REPO
 
-          # Commit y push
-          cd infra-core
+          # Actualizar values.yaml
+          cat <<EOF > kubernetes/${{ env.APP_NAME }}/values.yaml
+          image:
+            repository: ${{ env.IMAGE%%:*}}
+            tag: "${{ env.TAG }}"
+          EOF
+
+          # Hacer commit y push
           git config user.email "quirama80@gmail.com"
           git config user.name "GitHub Actions"
           git add .
-          git commit -m "Deploy $TAG for $APP_NAME"
+          git commit -m "Auto-update: Deploy ${{ env.TAG }}"
           git push
+
+
       # ----------- Docker Hub (Opcional - Comentado) -----------
       # - name: Login to Docker Hub
       #   uses: docker/login-action@v3

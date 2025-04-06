@@ -86,8 +86,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: jhonquirama/infra-core
-          token: ${{ secrets.INFRA_REPO_TOKEN }}
+          token: ${{ secrets.INFRA_REPO_TOKEN }}  # Asegúrate que este secret existe
           path: infra-core
+          fetch-depth: 0  # Opcional: clona todo el historial
 
       - name: Update Helm Chart
         if: success()

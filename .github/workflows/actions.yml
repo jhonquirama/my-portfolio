@@ -5,6 +5,9 @@ on:
     branches:
       - master
       - develop
+    paths-ignore:
+      - 'README.md'
+      - '**.txt'
   pull_request:
     branches:
       - master
@@ -25,11 +28,12 @@ jobs:
       RESTPORT: 8080
       ECR_REGISTRY: ${{ secrets.ECR_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
       ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-      APP_NAME: "blt-msa-ha-checkout-bookings-broker"  # Nombre de tu app
+      APP_NAME: "blt-msa-ha-checkout-bookings-broker"
 
     steps:
-      # Configuración inicial de Git y Go
-      - run: git config --global url.https://$REPO_TOKEN@github.com/jhonquirama/.insteadOf https://github.com/jhonquirama/
+      - name: Configure Git
+        run: git config --global url.https://${{ env.REPO_TOKEN }}@github.com/jhonquirama/.insteadOf https://github.com/jhonquirama/
+
       - uses: actions/checkout@v4
 
       - name: Setup Go
@@ -37,26 +41,22 @@ jobs:
         with:
           go-version: '1.22.1'
 
-      # Build, tests y linting
       - name: Build
         run: make build
 
       - name: Lint
-        run: |
-          export GO111MODULE=off
-          make lint
+        run: make lint
 
       - name: Unit tests
         run: |
           go test -tags musl ./internal/... -coverprofile coverage.out -covermode count
           go tool cover -func coverage.out
 
-      - name: Quality Gate - Test coverage
+      - name: Quality Gate
         run: make coverage
 
-      # Autenticación en AWS ECR
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4  # Versión más reciente
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -66,59 +66,42 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # Construir y subir imagen Docker
-      - name: Build and Push Docker image
-        id: docker_push
-        env:
-          ECR_REGISTRY: ${{ secrets.ECR_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+      - name: Normalize branch/tag
+        id: normalize_tag
         run: |
-          # Normalizar el tag
-          RAW_TAG=${{ github.event.inputs.target-branch || github.ref_name }}
+          if [[ -n "${{ github.event.inputs.target-branch }}" ]]; then
+            RAW_TAG="${{ github.event.inputs.target-branch }}"
+          else
+            RAW_TAG="${{ github.ref_name }}"
+          fi
           TAG=$(echo "$RAW_TAG" | tr '/' '-' | cut -c 1-30)
           echo "Normalized tag: $TAG"
-
-          # Construir y subir imagen
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$TAG
-
-          # Guardar tag para pasos posteriores
           echo "TAG=$TAG" >> $GITHUB_ENV
-          echo "IMAGE=$ECR_REGISTRY/$ECR_REPOSITORY:$TAG" >> $GITHUB_ENV
+          echo "IMAGE=${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:$TAG" >> $GITHUB_ENV
+
+      - name: Build and Push Docker image
+        run: |
+          docker build -t $IMAGE .
+          docker push $IMAGE
 
       - name: Update Helm Chart
-        if: success()
         env:
           INFRA_REPO: "infra-core"
         run: |
-          echo "Using normalized tag: ${{ env.TAG }}"
+          echo "Using tag: $TAG"
 
-          # Clonar repo de infraestructura
           git clone https://${{ secrets.INFRA_REPO_TOKEN }}@github.com/jhonquirama/$INFRA_REPO.git
           cd $INFRA_REPO
 
-          # Actualizar values.yaml
+          mkdir -p kubernetes/${{ env.APP_NAME }}
           cat <<EOF > kubernetes/${{ env.APP_NAME }}/values.yaml
           image:
-            repository: ${{ env.IMAGE%%:*}}
-            tag: "${{ env.TAG }}"
-          EOF
-
-          # Hacer commit y push
-          git config user.email "quirama80@gmail.com"
-          git config user.name "GitHub Actions"
-          git add .
-          git commit -m "Auto-update: Deploy ${{ env.TAG }}"
-          git push
-      # ----------- Docker Hub (Opcional - Comentado) -----------
-      # - name: Login to Docker Hub
-      #   uses: docker/login-action@v3
-      #   with:
-      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
-      #     password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      # - name: Build and Push to Docker Hub
-      #   run: |
-      #     IMAGE_TAG=develop
-      #     docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/myservice:$IMAGE_TAG .
-      #     docker push ${{ secrets.DOCKERHUB_USERNAME }}/myservice:$IMAGE_TAG
+            repository: ${IMAGE%%:*}
+            tag: "$TAG"
+            EOF
+            
+            git config user.email "actions@github.com"
+            git config user.name "GitHub Actions"
+            git add .
+            git commit -m "Deploy $TAG"
+            git push

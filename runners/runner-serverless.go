@@ -2,7 +2,6 @@ package runners
 
 import (
 	"context"
-
 	customLogger "github.com/jhonquirama/my-portfolio/pkg/log"
 	"github.com/jhonquirama/my-portfolio/pkg/server"
 )
@@ -10,13 +9,15 @@ import (
 type serverlessRunner struct {
 }
 
-func (runner *serverlessRunner) Run(ctx context.Context) error {
+func (runner *serverlessRunner) Run(ctx context.Context) {
 	customLogger.Info(ctx, "Running as Serverless ... ")
 
-	server, err := server.NewServer(ctx)
+	newServer, err := server.NewServer(ctx)
 	if err != nil {
-		return err
+		panic(err)
 	}
 
-	return server.GinLambda.Start()
+	if err = newServer.GinLambda.Start(); err != nil {
+		panic(err)
+	}
 }

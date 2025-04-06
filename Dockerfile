@@ -1,50 +1,36 @@
+# Etapa de build
+FROM golang:1.22.1-alpine AS builder
 
-# syntax=docker/dockerfile:1
+RUN apk add --no-cache git
 
-# image where make compiled goland app
-ARG  ID_AWS_ACCOUNT_ECR
-FROM ${ID_AWS_ACCOUNT_ECR}.dkr.ecr.us-east-1.amazonaws.com/blt-msa-ha-checkout-docker-base:golang-1.22.1-alpine as builder
-RUN apk update && apk upgrade && apk --no-cache add libc-dev glib-static gcc build-base ca-certificates gcc musl-dev git go
-RUN git clone --depth 1 --branch v2.4.0 https://github.com/edenhill/librdkafka.git \
-  && cd librdkafka \
-  && ./configure --prefix=/usr/local --libdir=/usr/local/lib --disable-lz4 --disable-ssl --disable-sasl --disable-zstd \
-  && make \
-  && make install
-
-
-
-ARG APPNAME
-ARG RESTPORT
-RUN mkdir -p {/app,/app/build,/app/scripts}
 WORKDIR /app
-ADD . ./
-CMD go get .
-RUN make aws_build
 
+COPY go.mod ./
+COPY go.sum ./
+RUN go mod download
 
-# image more small for run de golang app
+COPY . .
 
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./cmd
 
-FROM ${ID_AWS_ACCOUNT_ECR}.dkr.ecr.us-east-1.amazonaws.com/blt-msa-ha-checkout-docker-base:linux-alpine
+# Etapa final
+FROM alpine:latest
 
-RUN apk add --no-cache \
-         python3 \
-         py3-pip \
-     && pip3 install --upgrade pip \
-     && pip3 install --no-cache-dir \
-         awscli \
-     && rm -rf /var/cache/apk/*
+# Instala AWS CLI (opcional si lo necesitas en el entrypoint)
+RUN apk --no-cache add ca-certificates curl unzip bash \
+ && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
+ && unzip awscliv2.zip && ./aws/install \
+ && rm -rf awscliv2.zip aws
 
+WORKDIR /app
 
-RUN aws --version
+ENV APPNAME=main
 
-RUN mkdir docs
-COPY --from=builder /app/build/ .
+COPY --from=builder /app/main .
 COPY --from=builder /app/entrypoint.sh .
-COPY --from=builder /app/docs/ ./docs
 
-RUN ["chmod", "+x", "entrypoint.sh"]
-# entrypoint configure container an run dinamic the app golang
+RUN chmod +x /app/entrypoint.sh
 
-CMD [ "/entrypoint.sh" ]
-#CMD ["/bin/sh"]
+EXPOSE 8007
+
+CMD ["/app/entrypoint.sh"]

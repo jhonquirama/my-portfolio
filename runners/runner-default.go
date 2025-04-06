@@ -2,28 +2,39 @@ package runners
 
 import (
 	"context"
-	"fmt"
-
-	customLogger "github.com/jhonquirama/my-portfolio/pkg/log"
 	"github.com/jhonquirama/my-portfolio/pkg/server"
+	"log"
+	"os"
+	"os/signal"
+	"sync"
+	"syscall"
 )
 
 type defaultRunner struct {
 }
 
-func (runner *defaultRunner) Run(ctx context.Context) error {
-	server, err := server.NewServer(ctx)
+func (runner *defaultRunner) Run(ctx context.Context) {
+	newServer, err := server.NewServer(ctx)
 	if err != nil {
-		return err
+		panic(err)
 	}
 
-	// TODO: Add channel to stop gracefully
+	var wg sync.WaitGroup
+	var quit = make(chan struct{})
+	wg.Add(1)
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
-	if server.Config.ServerHTTPAddress() != "" {
-		customLogger.Info(ctx, fmt.Sprintf("Running as a HTTP Server on: %s.", server.Config.ServerHTTPAddress()))
+	go newServer.GinServer.Run(ctx, &wg, quit, newServer.Config.ServerHTTPAddress())
 
-		return server.GinServer.Run(server.Config.ServerHTTPAddress())
-	}
+	go func() {
+		<-c
+		log.Println("==========+++++++++===EXIT===++++++++++=======")
+		close(quit)
+	}()
 
-	return nil
+	wg.Wait()
+	<-quit
+
+	log.Println("microservice exited properly")
 }

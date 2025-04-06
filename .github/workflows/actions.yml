@@ -1,4 +1,4 @@
-name: test-lint-build
+name: test-lint-build-deploy
 
 on:
   push:
@@ -9,16 +9,26 @@ on:
     branches:
       - master
       - develop
+  workflow_dispatch:
+    inputs:
+      target-branch:
+        description: 'Branch to deploy (e.g., feature-x)'
+        required: true
+        type: string
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     env:
       GOPRIVATE: github.com/jhonquirama/config
       REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
       RESTPORT: 8080
+      ECR_REGISTRY: ${{ secrets.ECR_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+      ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+      APP_NAME: "blt-msa-ha-checkout-bookings-broker"  # Nombre de tu app
 
     steps:
+      # Configuración inicial de Git y Go
       - run: git config --global url.https://$REPO_TOKEN@github.com/jhonquirama/.insteadOf https://github.com/jhonquirama/
       - uses: actions/checkout@v4
 
@@ -27,9 +37,9 @@ jobs:
         with:
           go-version: '1.22.1'
 
+      # Build, tests y linting
       - name: Build
-        run: |
-          make build
+        run: make build
 
       - name: Lint
         run: |
@@ -41,13 +51,12 @@ jobs:
           go test -tags musl ./internal/... -coverprofile coverage.out -covermode count
           go tool cover -func coverage.out
 
-      - name: Quality Gate - Test coverage shall be above threshold
-        run: |
-          make coverage
+      - name: Quality Gate - Test coverage
+        run: make coverage
 
-      # ----------- ECR Login and Docker Push -----------
+      # Autenticación en AWS ECR
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v3
+        uses: aws-actions/configure-aws-credentials@v4  # Versión más reciente
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -57,27 +66,38 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build and Push Docker image to ECR
-        env:
-          ECR_REGISTRY: ${{ secrets.ECR_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+      # Construir y subir imagen Docker
+      - name: Build and Push Docker image
         run: |
-          IMAGE_TAG=develop
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          TAG=${{ github.event.inputs.target-branch || github.ref_name }}  # Usa la rama como tag
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$TAG
+
+      # Actualizar Helm chart en el repo de infraestructura
       - name: Update Helm Chart in Infra Repo
         env:
-          INFRA_REPO_TOKEN: ${{ secrets.INFRA_REPO_TOKEN }}
+          TAG: ${{ github.event.inputs.target-branch || github.ref_name }}
         run: |
-          git clone https://$INFRA_REPO_TOKEN@github.com/jhonquirama/infra-core.git
-          cd infra-core
-          echo "image.tag: \"$TAG\"" > kubernetes/my-ms/values.yaml
-          git config user.email "quirama80@gmail.com"
-          git config user.name "jhonquirama"
-          git add .
-          git commit -m "Deploy $TAG"
-          git push
+          # Clonar el repo de infraestructura usando actions/checkout (más seguro)
+          - name: Checkout Infra Repo
+            uses: actions/checkout@v4
+            with:
+              repository: jhonquirama/infra-core
+              token: ${{ secrets.INFRA_REPO_TOKEN }}
+              path: infra-core
 
+          # Actualizar el values.yaml
+          echo "image:
+            repository: $ECR_REGISTRY/$ECR_REPOSITORY
+            tag: \"$TAG\"" > infra-core/kubernetes/$APP_NAME/values.yaml
+
+          # Commit y push
+          cd infra-core
+          git config user.email "quirama80@gmail.com"
+          git config user.name "GitHub Actions"
+          git add .
+          git commit -m "Deploy $TAG for $APP_NAME"
+          git push
       # ----------- Docker Hub (Opcional - Comentado) -----------
       # - name: Login to Docker Hub
       #   uses: docker/login-action@v3

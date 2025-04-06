@@ -17,7 +17,6 @@ func NewHealthService() healthPort.HealthService {
 }
 
 func (svc *healthService) GetHealth(_ context.Context, _ healthModel.GetHealth) (healthModel.Health, error) {
-
 	for i := 0; i < 25; i++ {
 		fmt.Println("WIP", i)
 		time.Sleep(time.Second * 2)

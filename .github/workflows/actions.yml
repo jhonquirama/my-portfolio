@@ -81,26 +81,30 @@ jobs:
           echo "TAG=$TAG" >> $GITHUB_ENV
           echo "IMAGE=${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:$TAG" >> $GITHUB_ENV
 
+      - name: Checkout Infra Repo
+        if: success()
+        uses: actions/checkout@v4
+        with:
+          repository: jhonquirama/infra-core
+          token: ${{ secrets.INFRA_REPO_TOKEN }}
+          path: infra-core
+
       - name: Update Helm Chart
         if: success()
-        env:
-          INFRA_REPO: "infra-core"
-          INFRA_REPO_TOKEN: ${{ secrets.INFRA_REPO_TOKEN }}
         run: |
-          echo "Using tag: $TAG"
-          git clone https://${{ env.INFRA_REPO_TOKEN }}@github.com/jhonquirama/${{ env.INFRA_REPO }}.git
-
-          cd $INFRA_REPO
+          echo "Using tag: ${{ env.TAG }}"
+          
+          cd infra-core
           
           mkdir -p kubernetes/${{ env.APP_NAME }}
           cat <<EOF > kubernetes/${{ env.APP_NAME }}/values.yaml
           image:
             repository: ${IMAGE%%:*}
-            tag: "$TAG"
+            tag: "${{ env.TAG }}"
             EOF
             
             git config user.email "actions@github.com"
             git config user.name "GitHub Actions"
             git add .
-            git commit -m "Deploy $TAG"
+            git commit -m "Deploy ${{ env.TAG }}"
             git push

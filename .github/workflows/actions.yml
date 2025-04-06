@@ -89,7 +89,8 @@ jobs:
         run: |
           echo "Using tag: $TAG"
           
-          git clone https://$INFRA_REPO_TOKEN@github.com/jhonquirama/$INFRA_REPO.git
+          git clone https://${{ env.INFRA_REPO_TOKEN }}@github.com/jhonquirama/infra-core.git
+
           cd $INFRA_REPO
           
           mkdir -p kubernetes/${{ env.APP_NAME }}

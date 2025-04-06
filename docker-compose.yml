@@ -9,5 +9,5 @@ services:
     environment:
       - ENV=dev
     volumes:
-      - ./settings/service.json:/root/settings/service.json
+      - ./settings/services.json:/root/settings/services.json
     restart: unless-stopped

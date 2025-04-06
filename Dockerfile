@@ -1,31 +1,50 @@
-# Etapa de build
-FROM golang:1.22.1-alpine AS builder
 
-# Instala git por si usas módulos externos
-RUN apk add --no-cache git
+# syntax=docker/dockerfile:1
 
+# image where make compiled goland app
+ARG  ID_AWS_ACCOUNT_ECR
+FROM ${ID_AWS_ACCOUNT_ECR}.dkr.ecr.us-east-1.amazonaws.com/blt-msa-ha-checkout-docker-base:golang-1.22.1-alpine as builder
+RUN apk update && apk upgrade && apk --no-cache add libc-dev glib-static gcc build-base ca-certificates gcc musl-dev git go
+RUN git clone --depth 1 --branch v2.4.0 https://github.com/edenhill/librdkafka.git \
+  && cd librdkafka \
+  && ./configure --prefix=/usr/local --libdir=/usr/local/lib --disable-lz4 --disable-ssl --disable-sasl --disable-zstd \
+  && make \
+  && make install
+
+
+
+ARG APPNAME
+ARG RESTPORT
+RUN mkdir -p {/app,/app/build,/app/scripts}
 WORKDIR /app
+ADD . ./
+CMD go get .
+RUN make aws_build
 
-# Copiamos los archivos de dependencia primero (para caché más eficiente)
-COPY go.mod ./
-COPY go.sum ./
-RUN go mod download
 
-# Ahora copiamos el resto del código
-COPY . .
+# image more small for run de golang app
 
-# Compilamos el binario estático para Linux
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./cmd
 
-# Etapa final: imagen liviana
-FROM alpine:latest
+FROM ${ID_AWS_ACCOUNT_ECR}.dkr.ecr.us-east-1.amazonaws.com/blt-msa-ha-checkout-docker-base:linux-alpine
 
-RUN apk --no-cache add ca-certificates
+RUN apk add --no-cache \
+         python3 \
+         py3-pip \
+     && pip3 install --upgrade pip \
+     && pip3 install --no-cache-dir \
+         awscli \
+     && rm -rf /var/cache/apk/*
 
-WORKDIR /root/
-COPY --from=builder /app/main .
 
-EXPOSE 8007
+RUN aws --version
 
-# Comando por defecto
-CMD ["./main"]
+RUN mkdir docs
+COPY --from=builder /app/build/ .
+COPY --from=builder /app/entrypoint.sh .
+COPY --from=builder /app/docs/ ./docs
+
+RUN ["chmod", "+x", "entrypoint.sh"]
+# entrypoint configure container an run dinamic the app golang
+
+CMD [ "/entrypoint.sh" ]
+#CMD ["/bin/sh"]

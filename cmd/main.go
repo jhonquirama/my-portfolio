@@ -21,15 +21,9 @@ package main
 
 import (
 	"context"
-
-	customLogger "github.com/jhonquirama/my-portfolio/pkg/log"
 	runner "github.com/jhonquirama/my-portfolio/runners"
 )
 
 func main() {
-	ctx := context.Background()
-
-	if err := runner.NewRunner().Run(ctx); err != nil {
-		customLogger.Fatal(ctx, err)
-	}
+	runner.NewRunner().Run(context.Background())
 }

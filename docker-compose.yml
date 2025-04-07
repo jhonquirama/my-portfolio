@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  myservice:
+    build: .
+    container_name: myservice
+    ports:
+      - "8000:8007" # Local:Contenedor
+    environment:
+      - ENV=dev
+    volumes:
+      - ./settings/services.json:/root/settings/services.json
+    restart: unless-stopped

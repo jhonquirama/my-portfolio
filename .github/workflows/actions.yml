@@ -28,7 +28,7 @@ jobs:
       RESTPORT: 8080
       ECR_REGISTRY: ${{ secrets.ECR_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
       ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-      APP_NAME: "blt-msa-ha-checkout-bookings-broker"
+      APP_NAME: "my-portfolio-ms"
 
     steps:
       - name: Configure Git
@@ -92,20 +92,58 @@ jobs:
 
       - name: Update Helm Chart
         if: success()
+        env:
+          GIT_AUTHOR_NAME: "GitHub Actions"
+          GIT_COMMITTER_NAME: "GitHub Actions"
+          GIT_AUTHOR_EMAIL: "actions@github.com"
+          GIT_COMMITTER_EMAIL: "actions@github.com"
         run: |
+          echo "=== Starting Helm Chart Update ==="
           echo "Using tag: ${{ env.TAG }}"
+          echo "Image: ${{ env.IMAGE }}"
           
+          # Navegar al directorio del repo infra-core
           cd infra-core
           
+          # Crear directorio si no existe
           mkdir -p kubernetes/${{ env.APP_NAME }}
-          cat <<EOF > kubernetes/${{ env.APP_NAME }}/values.yaml
-          image:
-            repository: ${IMAGE%%:*}
-            tag: "${{ env.TAG }}"
-            EOF
-            
-            git config user.email "actions@github.com"
-            git config user.name "GitHub Actions"
+          
+          # Generar el values.yaml CORRECTAMENTE
+          echo "Generating values.yaml..."
+          cat > kubernetes/${{ env.APP_NAME }}/values.yaml <<'EOL'
+          repository: ${IMAGE%%:*}
+          tag: "${{ env.TAG }}"
+          EOL
+          
+          # Configuración global de Git
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git config --global push.default simple
+          
+          # Verificar cambios
+          echo "Checking for changes..."
+          git status
+          
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Changes detected. Committing..."
             git add .
-            git commit -m "Deploy ${{ env.TAG }}"
-            git push
+            git commit -m "Deploy ${{ env.TAG }} [ci skip]"
+          
+            echo "Pushing changes..."
+            git push origin HEAD:main
+            echo "Changes pushed successfully!"
+          else
+            echo "No changes to commit."
+          fi
+          
+          echo "=== Helm Chart Update Complete ==="
+
+      - name: Debug Infra Core
+        run: |
+          cd infra-core
+          echo "--- Current values.yaml ---"
+          cat kubernetes/${{ env.APP_NAME }}/values.yaml
+          echo "--- Git Status ---"
+          git status
+          echo "--- Git Remotes ---"
+          git remote -v

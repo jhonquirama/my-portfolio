@@ -121,21 +121,26 @@ jobs:
           git config --global push.default simple
           
           # Verificar cambios
+          
+          # Verificar cambios
           echo "Checking for changes..."
           git status
           
           if [ -n "$(git status --porcelain)" ]; then
-            echo "Changes detected. Committing..."
-            git add .
-            git commit -m "Deploy ${{ env.TAG }} [ci skip]"
-          
-            echo "Pushing changes..."
-            git push origin HEAD:main
-            echo "Changes pushed successfully!"
+          echo "Changes detected. Committing..."
+          git add .
+          git commit -m "Deploy ${{ env.TAG }} [ci skip]"
+        
+          echo "Pulling latest changes..."
+          git pull --rebase origin main
+        
+          echo "Pushing changes..."
+          git push origin HEAD:main
+          echo "Changes pushed successfully!"
           else
-            echo "No changes to commit."
+          echo "No changes to commit."
           fi
-          
+
           echo "=== Helm Chart Update Complete ==="
 
       - name: Debug Infra Core

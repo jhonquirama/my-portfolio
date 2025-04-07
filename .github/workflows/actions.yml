@@ -132,10 +132,10 @@ jobs:
           git commit -m "Deploy ${{ env.TAG }} [ci skip]"
         
           echo "Pulling latest changes..."
-          git pull --rebase origin main
+          git pull --rebase origin master
         
           echo "Pushing changes..."
-          git push origin HEAD:main
+          git push origin HEAD:master
           echo "Changes pushed successfully!"
           else
           echo "No changes to commit."

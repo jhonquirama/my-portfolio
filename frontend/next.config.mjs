@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
 const securityHeaders = [
   {
+    key: "X-Robots-Tag",
+    value: "all, index, follow",
+  },
+  {
     key: "X-DNS-Prefetch-Control",
     value: "on",
   },

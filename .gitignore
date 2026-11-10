@@ -27,3 +27,11 @@ crash.log
 *.tfplan
 .terraform.lock.hcl
 /scripts/aws
+
+# Node & Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env*.local
+*.tsbuildinfo
+next-env.d.ts

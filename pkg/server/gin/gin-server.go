@@ -18,7 +18,7 @@ type (
 		Engine    *gin.Engine
 		Tracer    *trace.TracerProvider
 		Container container.Container
-		Svc       *http.Server
+		// Svc       *http.Server
 	}
 )
 

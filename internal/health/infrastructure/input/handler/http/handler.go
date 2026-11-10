@@ -8,7 +8,6 @@ import (
 	userModel "github.com/jhonquirama/my-portfolio/internal/health/business/model"
 	userPort "github.com/jhonquirama/my-portfolio/internal/health/business/port"
 	ioModel "github.com/jhonquirama/my-portfolio/internal/health/infrastructure/input/handler/http/iomodel"
-	apm "github.com/jhonquirama/my-portfolio/pkg/monitor/elastic-apm"
 )
 
 type HealthHandler struct {
@@ -32,12 +31,11 @@ func NewHealthHandler(
 //		400: ErrorResponse
 func (h *HealthHandler) GetHealth(g *gin.Context) {
 	var (
-		ctx    = apm.RequestContext(g)
 		health userModel.Health
 		err    error
 	)
 
-	if health, err = h.service.GetHealth(ctx, ioModel.ToGetHealthModel()); err != nil {
+	if health, err = h.service.GetHealth(g.Request.Context(), ioModel.ToGetHealthModel()); err != nil {
 		g.Errors = append(g.Errors, g.Error(err))
 		return
 	}

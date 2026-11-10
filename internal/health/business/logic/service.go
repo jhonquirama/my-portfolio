@@ -2,28 +2,25 @@ package logic
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	healthModel "github.com/jhonquirama/my-portfolio/internal/health/business/model"
 	healthPort "github.com/jhonquirama/my-portfolio/internal/health/business/port"
-	apm "github.com/jhonquirama/my-portfolio/pkg/monitor/elastic-apm"
 )
 
 type healthService struct {
-	healthRepository healthPort.HealthRepository
 }
 
-func NewHealthService(
-	healthRepository healthPort.HealthRepository,
-) healthPort.HealthService {
-	return &healthService{
-		healthRepository: healthRepository,
+func NewHealthService() healthPort.HealthService {
+	return &healthService{}
+}
+
+func (svc *healthService) GetHealth(_ context.Context, _ healthModel.GetHealth) (healthModel.Health, error) {
+	for i := 0; i < 25; i++ {
+		fmt.Println("WIP", i)
+		time.Sleep(time.Second * 2)
 	}
-}
-
-func (svc *healthService) GetHealth(ctx context.Context, filter healthModel.GetHealth) (healthModel.Health, error) {
-	_ = filter
-	span, _ := apm.NewSpan(ctx, apm.Service)
-	defer span.End()
 	return healthModel.Health{
 		Status: "Ok",
 	}, nil

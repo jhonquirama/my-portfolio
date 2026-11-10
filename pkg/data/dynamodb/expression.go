@@ -27,22 +27,7 @@ type (
 		ConditionExpression       string
 		ExpressionAttributeValues map[string]types.AttributeValue
 	}
-
 	ConditionalValues []ConditionalValue
-
-	Put struct {
-		TableName string
-		Item      any
-	}
-	Update struct {
-		TableName    string
-		KeyCondition ConditionalValues
-		Data         map[string]any
-	}
-	TransactWriteItems struct {
-		Put    []Put
-		Update []Update
-	}
 )
 
 // --- helpers --- //
@@ -115,23 +100,6 @@ func (*dynamo) getBuilderWithFilter(builder expression.Builder, filter Condition
 	return builder
 }
 
-func (*dynamo) getBuilderWithUpdate(data map[string]any) (expression.Builder, error) {
-	var (
-		firstValue    = true
-		updateBuilder expression.UpdateBuilder
-	)
-
-	for key, value := range data {
-		if firstValue {
-			updateBuilder = expression.Set(expression.Name(key), expression.Value(value))
-			firstValue = false
-		} else {
-			updateBuilder = updateBuilder.Set(expression.Name(key), expression.Value(value))
-		}
-	}
-	return expression.NewBuilder().WithUpdate(updateBuilder), nil
-}
-
 func (*dynamo) getAttributeKey(keyCondition ConditionalValues) (map[string]types.AttributeValue, error) {
 	var (
 		attributeValue map[string]types.AttributeValue
@@ -146,7 +114,6 @@ func (*dynamo) getAttributeKey(keyCondition ConditionalValues) (map[string]types
 	}
 	return attributeValue, nil
 }
-
 func (*dynamo) getAttributeKeys(keyConditions []ConditionalValues) ([]map[string]types.AttributeValue, error) {
 	var (
 		attributeValues []map[string]types.AttributeValue

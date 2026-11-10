@@ -2,48 +2,35 @@ package server
 
 import (
 	"context"
-
+	"github.com/jhonquirama/my-portfolio/pkg/config"
 	"github.com/jhonquirama/my-portfolio/pkg/container"
 	customLogger "github.com/jhonquirama/my-portfolio/pkg/log"
-	apm "github.com/jhonquirama/my-portfolio/pkg/monitor/elastic-apm"
 	"github.com/jhonquirama/my-portfolio/pkg/server/gin"
 	lambda "github.com/jhonquirama/my-portfolio/pkg/server/gin-lambda"
-	"github.com/jhonquirama/my-portfolio/pkg/settings"
 )
 
 type Server struct {
 	GinServer *gin.Server
 	GinLambda *lambda.GinLambdaServer
-	Config    settings.Config
+	Config    config.Config
 }
 
 func NewServer(ctx context.Context) (*Server, error) {
-	var (
-		cnf    settings.Config
-		cnt    container.Container
-		tracer *apm.Tracer
-		err    error
-	)
-
-	if cnf, err = settings.NewConfigFromFile(); err != nil {
-		if cnf, err = settings.NewConfigFromSystemManager(ctx); err != nil {
+	cnf, err := config.NewConfigFromFile()
+	if err != nil {
+		if cnf, err = config.NewConfigFromSystemManager(ctx); err != nil {
 			return nil, err
 		}
 	}
 
-	if cnt, err = container.NewContainer(ctx, cnf); err != nil {
+	cnt, err := container.NewContainer(ctx, cnf)
+	if err != nil {
 		return nil, err
 	}
-
-	if tracer, err = apm.NewAPM(cnf.ApmConfig()); err != nil {
-		return nil, err
-	}
-
-	tracer.Flush(nil)
 
 	customLogger.SetEnvironment(cnf.ApmConfig().ApmEnvironment())
 
-	ginServer := gin.NewGinServer(tracer, cnt)
+	ginServer := gin.NewGinServer(cnt.Tracer(), cnt)
 
 	return &Server{
 		GinServer: ginServer,

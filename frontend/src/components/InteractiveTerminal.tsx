@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useLanguage } from "./LanguageContext";
 import { Terminal as TerminalIcon, CornerDownLeft, Sparkles } from "lucide-react";
+import { CvDownloadError, downloadCvFile } from "@/lib/download-cv";
 
 interface HistoryEntry {
   command: string;
@@ -25,15 +26,45 @@ export default function InteractiveTerminal() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [history]);
 
-  const handleCommand = (cmd: string) => {
-    const trimmed = cmd.trim().toLowerCase();
-    if (!trimmed) return;
+  const cvMessage = (code: CvDownloadError["code"]) => {
+    if (code === "invalid_token") return t.hero.cvInvalid;
+    if (code === "rate_limited") return t.hero.cvRate;
+    return t.hero.cvUnavailable;
+  };
 
-    if (trimmed === "clear") {
+  const handleCommand = async (cmd: string) => {
+    const raw = cmd.trim();
+    if (!raw) return;
+
+    const lowered = raw.toLowerCase();
+
+    if (lowered === "clear") {
       setHistory([]);
       setInputVal("");
       return;
     }
+
+    const cvMatch = raw.match(/^cv(?:\s+(\S+))?$/i);
+    if (cvMatch) {
+      const token = cvMatch[1]?.trim() ?? "";
+      let output: React.ReactNode;
+      if (!token) {
+        output = <p className="text-amber-200">{t.hero.cvBody} <span className="text-cyan-200">cv &lt;código&gt;</span></p>;
+      } else {
+        try {
+          await downloadCvFile(token, lang);
+          output = <p className="text-emerald-300">{t.hero.cvDownloaded}</p>;
+        } catch (error) {
+          const code = error instanceof CvDownloadError ? error.code : "unavailable";
+          output = <p className="text-rose-300">{cvMessage(code)}</p>;
+        }
+      }
+      setHistory((prev) => [...prev, { command: token ? "cv ••••••••" : "cv", output }]);
+      setInputVal("");
+      return;
+    }
+
+    const trimmed = lowered;
 
     let result: React.ReactNode = "";
 
@@ -47,7 +78,7 @@ export default function InteractiveTerminal() {
             <p>• <span className="text-cyan-300">skills</span>: Lista de tecnologías y herramientas</p>
             <p>• <span className="text-cyan-300">contact</span>: Ver teléfono, email y canales directos</p>
             <p>• <span className="text-cyan-300">hire</span>: Ir al formulario de cotización</p>
-            <p>• <span className="text-cyan-300">cv</span>: Descargar hoja de vida en PDF</p>
+            <p>• <span className="text-cyan-300">cv &lt;código&gt;</span>: Descargar la hoja de vida con un código de acceso</p>
             <p>• <span className="text-cyan-300">clear</span>: Limpiar pantalla</p>
           </div>
         );
@@ -116,11 +147,6 @@ export default function InteractiveTerminal() {
         setTimeout(() => {
           document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
         }, 500);
-        break;
-
-      case "cv":
-        result = <p className="text-emerald-300">Descargando hoja de vida...</p>;
-        window.open(lang === "es" ? "/cv-jhon-quirama-es.pdf" : "/cv-jhon-quirama-en.pdf", "_blank");
         break;
 
       default:

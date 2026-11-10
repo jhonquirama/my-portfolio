@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { getSiteUrl } from "@/lib/site-url";
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL && !process.env.NEXT_PUBLIC_SITE_URL.includes("localhost")
-    ? process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "")
-    : "https://my-portfolio-jhonqs-projects.vercel.app";
+const siteUrl = getSiteUrl();
+const isPreview = process.env.VERCEL_ENV === "preview";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -31,17 +30,19 @@ export const metadata: Metadata = {
   authors: [{ name: "Jhon Quirama", url: siteUrl }],
   creator: "Jhon Quirama",
   publisher: "Jhon Quirama",
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
+  robots: isPreview
+    ? { index: false, follow: false }
+    : {
+        index: true,
+        follow: true,
+        googleBot: {
+          index: true,
+          follow: true,
+          "max-video-preview": -1,
+          "max-image-preview": "large",
+          "max-snippet": -1,
+        },
+      },
   openGraph: {
     type: "website",
     locale: "es_ES",

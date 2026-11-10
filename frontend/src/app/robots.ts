@@ -1,17 +1,24 @@
 import { MetadataRoute } from "next";
+import { getSiteUrl } from "@/lib/site-url";
+
+export const dynamic = "force-dynamic";
 
 export default function robots(): MetadataRoute.Robots {
-  const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL && !process.env.NEXT_PUBLIC_SITE_URL.includes("localhost")
-      ? process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "")
-      : "https://my-portfolio-jhonqs-projects.vercel.app";
+  if (process.env.VERCEL_ENV === "preview") {
+    return {
+      rules: {
+        userAgent: "*",
+        disallow: "/",
+      },
+    };
+  }
 
   return {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/api/"],
+      disallow: ["/api/", "/cv/", "/cv-jhon-quirama-es.pdf", "/cv-jhon-quirama-en.pdf"],
     },
-    sitemap: `${siteUrl}/sitemap.xml`,
+    sitemap: `${getSiteUrl()}/sitemap.xml`,
   };
 }

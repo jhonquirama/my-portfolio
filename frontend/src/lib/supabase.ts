@@ -20,3 +20,14 @@ export const supabaseAdmin = Boolean(supabaseUrl && (supabaseServiceKey || supab
       },
     })
   : null;
+
+// Service role only. CV files and access codes must never fall back to the anon key.
+export const supabaseService =
+  supabaseUrl && supabaseServiceKey
+    ? createClient(supabaseUrl, supabaseServiceKey, {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      })
+    : null;

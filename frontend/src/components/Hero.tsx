@@ -2,10 +2,11 @@
 
 import React from "react";
 import { useLanguage } from "./LanguageContext";
-import { ArrowRight, Download, Terminal, CheckCircle2, ShieldCheck, Zap } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import CvDownloadButton from "./CvDownloadButton";
 
 export default function Hero() {
-  const { t, lang } = useLanguage();
+  const { t } = useLanguage();
 
   const techBadges = [
     "Golang",
@@ -59,15 +60,7 @@ export default function Hero() {
               <span>{t.hero.ctaSecondary}</span>
             </a>
 
-            <a
-              href={lang === "es" ? "/cv-jhon-quirama-es.pdf" : "/cv-jhon-quirama-en.pdf"}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-3.5 rounded-xl text-sm font-mono text-slate-400 hover:text-cyan-400 border border-transparent hover:border-cyan-500/30 transition-all"
-            >
-              <Download className="w-4 h-4" />
-              <span>{t.hero.downloadCv}</span>
-            </a>
+            <CvDownloadButton />
           </div>
         </div>
 

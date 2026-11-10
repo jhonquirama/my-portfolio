@@ -18,6 +18,7 @@ my-portfolio/
 │   │   ├── app/                     # Rutas, Layout, SEO (Sitemap & Robots), APIs
 │   │   │   ├── api/contact/         # API de contacto blindada (Rate limiting, Zod, Resend, Supabase)
 │   │   │   ├── api/counter/         # API de métricas y contador de visitas en tiempo real
+│   │   │   ├── api/cv/              # Descarga del CV solo con código de acceso
 │   │   │   ├── sitemap.ts           # Generador dinámico de Sitemap XML para Google
 │   │   │   └── robots.ts            # Reglas de indexación SEO
 │   │   ├── components/              # Componentes React con Tailwind y Framer Motion
@@ -37,9 +38,7 @@ my-portfolio/
 │   │   │   ├── supabase.ts          # Cliente y administración Supabase con RLS
 │   │   │   ├── rate-limiter.ts      # Limitador de peticiones anti-DDoS / anti-spam
 │   │   │   └── utils.ts             # Utilidades de estilo y formateo
-│   │   └── public/
-│   │       ├── cv-jhon-quirama-es.pdf # Hoja de vida en español
-│   │       └── cv-jhon-quirama-en.pdf # Resume en inglés
+│   ├── private/cv/                # PDF locales, fuera de git. En producción viven en Supabase Storage privado
 │   └── supabase/
 │       └── schema.sql               # Script SQL listo para ejecutar en Supabase (RLS y RPC)
 │
@@ -110,11 +109,26 @@ CONTACT_RECEIVER_EMAIL=quirama80@gmail.com
 
 ---
 
+## CV privado
+
+Los PDF no están en el sitio ni en el repositorio. Viven en un bucket privado de Supabase y solo se entregan con un código.
+
+```bash
+cd frontend
+npm run cv:token -- setup
+npm run cv:token -- create --label "Empresa ACME" --days 30 --max 3
+npm run cv:token -- list
+npm run cv:token -- revoke --id <id>
+```
+
+`setup` sube los archivos de `frontend/private/cv/`. El comando `create` imprime el código y el enlace una sola vez.
+
 ## 🔒 Blindaje de Seguridad Implementado
 
 - **Cabeceras HTTP de Alta Seguridad:** HSTS, X-Frame-Options: DENY, X-Content-Type-Options, Referrer-Policy y Permissions-Policy configuradas en `next.config.mjs`.
 - **Protección Anti-Spam / Bots:** Campo invisibilizado *Honeypot* en el formulario de contacto para desviar bots automáticamente.
-- **Rate Limiting:** Limitador de tasa por IP en memoria para prevenir saturación o abusos en `/api/contact` y `/api/counter`.
+- **Rate Limiting:** Limitador de tasa por IP en memoria para prevenir saturación o abusos en `/api/contact`, `/api/counter` y `/api/cv`.
+- **CV con código:** el PDF no es público. El servidor guarda solo el hash del código y entrega el archivo desde un bucket privado.
 - **Sanitización Estricta:** Validación con Zod para impedir ataques de Cross-Site Scripting (XSS) e inyecciones de datos maliciosos.
 - **Row-Level Security (RLS):** La clave anónima del navegador únicamente tiene permiso de escritura condicional de nuevos leads; ninguna persona externa puede consultar información de tus clientes.
 

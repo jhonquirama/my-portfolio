@@ -1,10 +1,6 @@
 /** @type {import('next').NextConfig} */
 const securityHeaders = [
   {
-    key: "X-Robots-Tag",
-    value: "all, index, follow",
-  },
-  {
     key: "X-DNS-Prefetch-Control",
     value: "on",
   },
@@ -43,6 +39,14 @@ const nextConfig = {
       {
         source: "/:path*",
         headers: securityHeaders,
+      },
+      {
+        source: "/api/:path*",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" }],
+      },
+      {
+        source: "/cv/:path*",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" }],
       },
     ];
   },

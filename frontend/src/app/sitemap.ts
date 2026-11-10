@@ -1,7 +1,12 @@
 import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://jhonquirama.dev";
+  // Use canonical production domain or configured env
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL && !process.env.NEXT_PUBLIC_SITE_URL.includes("localhost")
+      ? process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "")
+      : "https://my-portfolio-jhonqs-projects.vercel.app";
+
   const currentDate = new Date();
 
   return [
@@ -12,28 +17,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1.0,
     },
     {
-      url: `${siteUrl}#services`,
-      lastModified: currentDate,
-      changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${siteUrl}#experience`,
-      lastModified: currentDate,
-      changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${siteUrl}#architecture`,
+      url: `${siteUrl}/cv-jhon-quirama-es.pdf`,
       lastModified: currentDate,
       changeFrequency: "monthly",
       priority: 0.8,
     },
     {
-      url: `${siteUrl}#contact`,
+      url: `${siteUrl}/cv-jhon-quirama-en.pdf`,
       lastModified: currentDate,
       changeFrequency: "monthly",
-      priority: 0.9,
+      priority: 0.8,
     },
   ];
 }

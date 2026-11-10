@@ -11,16 +11,16 @@ const (
 )
 
 type Runner interface {
-	Run(ctx context.Context) error
+	Run(ctx context.Context)
 }
 
 type runner struct {
 }
 
 func NewRunner() Runner {
-	runner := runner{}
+	newRunner := runner{}
 
-	return runner.runMode()
+	return newRunner.runMode()
 }
 
 func (s *runner) runMode() Runner {

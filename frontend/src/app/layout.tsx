@@ -63,6 +63,9 @@ export const metadata: Metadata = {
       "en-US": siteUrl,
     },
   },
+  verification: {
+    google: "v4txeyUSamF8xnXlHtM6wrsYeB1ql5GUmzc2tPHD7w0",
+  },
 };
 
 const jsonLdPerson = {
@@ -122,6 +125,10 @@ export default function RootLayout({
   return (
     <html lang="es" className="dark">
       <head>
+        <meta
+          name="google-site-verification"
+          content="v4txeyUSamF8xnXlHtM6wrsYeB1ql5GUmzc2tPHD7w0"
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdPerson) }}

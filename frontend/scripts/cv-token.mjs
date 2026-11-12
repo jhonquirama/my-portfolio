@@ -6,7 +6,7 @@ import { createClient } from "@supabase/supabase-js";
 
 const BUCKET = "cv";
 const TOKEN_OBJECT = "tokens.json";
-const CANONICAL_HOST = "my-portfolio-jhonqs-projects.vercel.app";
+const CANONICAL_HOST = "my-portfolio-gamma-teal-3v1i358tc4.vercel.app";
 const CANONICAL_SITE_URL = `https://${CANONICAL_HOST}`;
 const PDFS = {
   es: "cv-jhon-quirama-es.pdf",
@@ -40,8 +40,10 @@ function siteUrl() {
   const configured = (process.env.NEXT_PUBLIC_SITE_URL || "").trim().replace(/\/+$/, "").split("#")[0];
   try {
     const host = new URL(configured).hostname.toLowerCase();
-    const unstableVercel = host.endsWith(".vercel.app") && host !== CANONICAL_HOST;
-    if (configured.startsWith("https://") && host !== "localhost" && !unstableVercel) return configured;
+    const customDomain = !host.endsWith(".vercel.app");
+    if (configured.startsWith("https://") && host !== "localhost" && (customDomain || host === CANONICAL_HOST)) {
+      return configured;
+    }
   } catch {
     // Fall through to the Search Console property.
   }

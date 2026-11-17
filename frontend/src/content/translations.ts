@@ -224,12 +224,6 @@ export const translations = {
         scheduleCall: "Agendar una llamada de 20 minutos",
       },
     },
-    counter: {
-      title: "Métricas del Sitio en Tiempo Real",
-      totalViews: "Visualizaciones Totales",
-      uniqueVisitors: "Visitantes Únicos",
-      status: "Monitoreo Activo",
-    },
     footer: {
       rights: "Todos los derechos reservados.",
       builtWith: "Diseñado con Next.js 15, TypeScript, Tailwind CSS, Supabase y Three.js.",
@@ -458,12 +452,6 @@ export const translations = {
         location: "Colombia (Available Globally Remote)",
         scheduleCall: "Book a 20-min discovery call",
       },
-    },
-    counter: {
-      title: "Live Visitor & Traffic Metrics",
-      totalViews: "Total Page Views",
-      uniqueVisitors: "Unique Visitors",
-      status: "Live Tracking Active",
     },
     footer: {
       rights: "All rights reserved.",

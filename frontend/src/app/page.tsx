@@ -2,7 +2,6 @@ import { LanguageProvider } from "@/components/LanguageContext";
 import BackgroundCanvas from "@/components/BackgroundCanvas";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
-import LiveCounter from "@/components/LiveCounter";
 import ServicesSection from "@/components/ServicesSection";
 import ExperienceSection from "@/components/ExperienceSection";
 import ArchitectureRadar from "@/components/ArchitectureRadar";
@@ -24,9 +23,6 @@ export default function Home() {
         <main className="relative z-10 flex flex-col">
           {/* Hero Value Proposition */}
           <Hero />
-
-          {/* Real-time Visitor Counter */}
-          <LiveCounter />
 
           {/* Bespoke Software Services */}
           <ServicesSection />

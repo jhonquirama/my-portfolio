@@ -32,13 +32,11 @@ CREATE POLICY "Allow anonymous lead submission"
         length(message) > 5
     );
 
--- Allow authenticated users (Jhon logged in to Supabase) full access
+-- Do not grant lead reads to every authenticated account. The SQL editor and the
+-- service role can still read contact_leads. A public signup would otherwise
+-- be able to select every message.
 DROP POLICY IF EXISTS "Allow owner read and write leads" ON public.contact_leads;
-CREATE POLICY "Allow owner read and write leads" 
-    ON public.contact_leads 
-    FOR ALL 
-    TO authenticated 
-    USING (true);
+REVOKE SELECT, UPDATE, DELETE ON public.contact_leads FROM anon, authenticated;
 
 
 -- 2. Table: Visitor Counter & Page Views (Métricas y Contador en Vivo)

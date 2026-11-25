@@ -3,6 +3,26 @@ interface RateLimitRecord {
   resetAt: number;
 }
 
+type HeaderSource = {
+  get(name: string): string | null;
+};
+
+// Prefer the address set by the platform. The left-most X-Forwarded-For value is client-controlled.
+export function clientAddress(headers: HeaderSource, platformIp?: string | null): string {
+  const realIp = headers.get("x-real-ip")?.trim();
+  if (realIp) return realIp;
+  if (platformIp?.trim()) return platformIp.trim();
+
+  const forwarded = headers.get("x-forwarded-for");
+  if (forwarded) {
+    const hops = forwarded.split(",").map((part) => part.trim()).filter(Boolean);
+    const nearest = hops.at(-1);
+    if (nearest) return nearest;
+  }
+
+  return "127.0.0.1";
+}
+
 const memoryStore = new Map<string, RateLimitRecord>();
 
 /**

@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
-import { checkRateLimit } from "@/lib/rate-limiter";
+import { checkRateLimit, clientAddress } from "@/lib/rate-limiter";
 import { cvErrorResponse, serveCvDownload } from "@/lib/cv-access";
 
 const bodySchema = z.object({
@@ -9,11 +9,7 @@ const bodySchema = z.object({
 });
 
 function clientIp(req: NextRequest) {
-  return (
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    req.headers.get("x-real-ip") ||
-    "127.0.0.1"
-  );
+  return clientAddress(req.headers, req.ip);
 }
 
 export async function POST(req: NextRequest) {

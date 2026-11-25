@@ -179,6 +179,7 @@ export default function ContactSection() {
                 onChange={handleChange}
                 style={{ display: "none" }}
                 tabIndex={-1}
+                aria-hidden="true"
                 autoComplete="off"
               />
 
@@ -212,12 +213,14 @@ export default function ContactSection() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     {/* Name */}
                     <div>
-                      <label className="block text-xs font-mono text-slate-300 mb-2">
+                      <label htmlFor="contact-name" className="block text-xs font-mono text-slate-300 mb-2">
                         {t.contact.form.nameLabel} *
                       </label>
                       <input
+                        id="contact-name"
                         type="text"
                         name="name"
+                        autoComplete="name"
                         required
                         value={formData.name}
                         onChange={handleChange}
@@ -228,12 +231,14 @@ export default function ContactSection() {
 
                     {/* Email */}
                     <div>
-                      <label className="block text-xs font-mono text-slate-300 mb-2">
+                      <label htmlFor="contact-email" className="block text-xs font-mono text-slate-300 mb-2">
                         {t.contact.form.emailLabel} *
                       </label>
                       <input
+                        id="contact-email"
                         type="email"
                         name="email"
+                        autoComplete="email"
                         required
                         value={formData.email}
                         onChange={handleChange}

@@ -7,6 +7,7 @@ import ExperienceSection from "@/components/ExperienceSection";
 import ArchitectureRadar from "@/components/ArchitectureRadar";
 import InteractiveTerminal from "@/components/InteractiveTerminal";
 import ContactSection from "@/components/ContactSection";
+import VisitTracker from "@/components/VisitTracker";
 import Footer from "@/components/Footer";
 
 export default function Home() {
@@ -18,6 +19,7 @@ export default function Home() {
 
         {/* Floating Top Navigation */}
         <Navbar />
+        <VisitTracker />
 
         {/* Main Content Area */}
         <main className="relative z-10 flex flex-col">

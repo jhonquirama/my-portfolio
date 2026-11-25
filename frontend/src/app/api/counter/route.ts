@@ -55,25 +55,23 @@ export async function POST(req: NextRequest) {
       .slice(0, 16);
 
     if (supabaseAdmin) {
-      try {
-        const { data, error } = await supabaseAdmin.rpc("record_page_visit", {
-          page_target: "/",
-          visitor_hash_input: visitorHash,
-        });
+      const { data, error } = await supabaseAdmin.rpc("record_page_visit", {
+        page_target: "/",
+        visitor_hash_input: visitorHash,
+      });
 
-        if (!error && data) {
-          return NextResponse.json({
-            ok: true,
-            views: data.views,
-            uniques: data.unique_visitors,
-          });
-        }
-      } catch (rpcErr) {
-        console.error("Supabase RPC record_page_visit error:", rpcErr);
+      if (error || !data) {
+        console.error("record_page_visit failed:", error?.message);
+        return NextResponse.json({ ok: false }, { status: 502 });
       }
+
+      return NextResponse.json({
+        ok: true,
+        views: data.views,
+        uniques: data.unique_visitors,
+      });
     }
 
-    // Fallback update
     localViews += 1;
     return NextResponse.json({
       ok: true,
